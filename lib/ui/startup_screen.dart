@@ -1,15 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:hack_heroes_mobile/logic/app_mode.dart';
+import 'package:hack_heroes_mobile/logic/user_settings.dart';
+import 'package:hack_heroes_mobile/ui/ConfiguratorScreen.dart';
+import 'package:hack_heroes_mobile/ui/blind_home.dart';
 
 class StartupScreen extends StatelessWidget {
+  Widget _startupScreen(BuildContext context, AsyncSnapshot snapshot) {
+
+    // loading indicator while getting user settings
+    if (snapshot.connectionState != ConnectionState.done) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Hack Heroes"),
+        ),
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    // go to home screen for the selected mode
+    if (!UserSettings.firstRun) {
+      switch (UserSettings.mode) {
+        case AppMode.Blind:
+          return BlindHome();
+
+        default:
+          return Text("How did you choose a nonexistent mode???");
+      }
+    }
+
+    // first time setup
+    return ConfiguratorScreen();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Hack Heroes 2019"),
-      ),
-      body: Center(
-        child: Text("AEAEAEAEAE"),
-      ),
+    return FutureBuilder(
+      builder: _startupScreen,
+      future: UserSettings.load(),
     );
   }
 }
