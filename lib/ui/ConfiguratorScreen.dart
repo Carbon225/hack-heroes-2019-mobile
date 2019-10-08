@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hack_heroes_mobile/logic/app_mode.dart';
+import 'package:hack_heroes_mobile/logic/user_settings.dart';
+import 'package:hack_heroes_mobile/ui/blind_home.dart';
 
 class ConfiguratorScreen extends StatefulWidget {
   Widget _about(BuildContext context) {
@@ -36,9 +38,29 @@ class ConfiguratorScreen extends StatefulWidget {
   State<StatefulWidget> createState() => ConfiguratorScreenState();
 }
 
-class ConfiguratorScreenState extends State<ConfiguratorScreen> {
+class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTickerProviderStateMixin {
   AppMode _mode = AppMode.Helper;
   bool _demoMode = false;
+
+  Animation<Offset> _cardAnimation;
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: Duration(milliseconds: 500),
+      vsync: this
+    );
+    _cardAnimation = MaterialPointArcTween(begin: Offset.zero, end: Offset(1.0, 0.0)).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   Widget _modeSelect(BuildContext context) {
     return Row(
@@ -83,7 +105,10 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> {
       subtitle: Text("Select to simulate a Braillepad"),
       value: _demoMode,
       secondary: Icon(Icons.developer_mode),
-      onChanged: (bool value) => setState(() => _demoMode = value),
+      onChanged: (bool value) => setState(() {
+        _demoMode = value;
+        _demoMode ? _controller.forward() : _controller.reverse();
+      }),
     );
   }
 
@@ -144,9 +169,25 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> {
 
   Widget _finish(BuildContext context) {
     return FloatingActionButton.extended(
-      onPressed: () {},
-      label: Text("Complete"),
+      onPressed: () {
+        UserSettings.mode = _mode;
+        UserSettings.demoMode = _demoMode;
+        UserSettings.firstRun = false;
+
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) {
+            switch (_mode) {
+              case AppMode.Blind:
+                return BlindHome();
+              default:
+                return BlindHome();
+            }
+          }
+        ));
+      },
+      label: Text("Continue"),
       icon: Icon(Icons.done),
+      backgroundColor: Colors.greenAccent,
     );
   }
 
@@ -162,8 +203,13 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> {
           widget._about(context),
           _settings(context),
 
+          SlideTransition(
+            position: _cardAnimation,
+            child: _pairDevice(context),
+          ),
+
           // write sliding animation
-          _demoMode ? Container() : _pairDevice(context),
+//          _demoMode ? Container() : _pairDevice(context),
         ],
       ),
     );
