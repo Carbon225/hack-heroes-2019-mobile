@@ -10,7 +10,7 @@ class UserSettings {
 
 
   static bool get firstRun {
-//    return false;
+//    return true;
 
     // if perfs was not initialized or the key was not found we are running for the first time
     return perfs?.getBool("firstRun") ?? true;

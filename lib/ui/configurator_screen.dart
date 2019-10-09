@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hack_heroes_mobile/logic/app_mode.dart';
 import 'package:hack_heroes_mobile/logic/user_settings.dart';
 import 'package:hack_heroes_mobile/ui/blind_home.dart';
+import 'package:hack_heroes_mobile/ui/helper_home.dart';
 
 class ConfiguratorScreen extends StatefulWidget {
   Widget _about(BuildContext context) {
@@ -19,12 +20,12 @@ class ConfiguratorScreen extends StatefulWidget {
                   color: Colors.blue,
                   size: 100,
                 ),
-                Text("Hack Heroes",
+                Text('Hack Heroes',
                   style: Theme.of(context).textTheme.title.apply(fontSizeFactor: 2),
                 )
               ],
             ),
-            Text("Welcome to DA APP. It is great. It works. This is a description. You can you DA APP. Press this and that to do things.",
+            Text('Welcome to DA APP. It is great. It works. This is a description. You can you DA APP. Press this and that to do things.',
               textAlign: TextAlign.justify,
               style: Theme.of(context).textTheme.body1,
             ),
@@ -49,11 +50,16 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
   void initState() {
     super.initState();
 
+    _mode = UserSettings.mode;
+    _demoMode = UserSettings.demoMode;
+
     _controller = AnimationController(
       duration: Duration(milliseconds: 500),
       vsync: this
     );
     _cardAnimation = MaterialPointArcTween(begin: Offset.zero, end: Offset(1.0, 0.0)).animate(_controller);
+
+    _controller.value = _demoMode ? 1 : 0;
   }
 
   @override
@@ -71,26 +77,26 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
             size: 30,
           ),
         ),
-        Text("Mode",
+        Text('Mode',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.subhead,//.apply(fontSizeFactor: 1.2),
         ),
         Expanded(
           child: RadioListTile(
-            title: Text("Helper",
-              style: Theme.of(context).textTheme.button,
+            title: Text('Blind',
+                style: Theme.of(context).textTheme.button
             ),
-            value: AppMode.Helper,
+            value: AppMode.Blind,
             groupValue: _mode,
             onChanged: (mode) => setState(() => _mode = mode),
           ),
         ),
         Expanded(
           child: RadioListTile(
-            title: Text("Blind",
-                style: Theme.of(context).textTheme.button
+            title: Text('Helper',
+              style: Theme.of(context).textTheme.button,
             ),
-            value: AppMode.Blind,
+            value: AppMode.Helper,
             groupValue: _mode,
             onChanged: (mode) => setState(() => _mode = mode),
           ),
@@ -101,8 +107,8 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
 
   Widget _demoSelect(BuildContext context) {
     return SwitchListTile(
-      title: Text("Demo mode"),
-      subtitle: Text("Select to simulate a Braillepad"),
+      title: Text('Demo mode'),
+      subtitle: Text('Select to simulate a Braillepad'),
       value: _demoMode,
       secondary: Icon(Icons.developer_mode),
       onChanged: (bool value) => setState(() {
@@ -130,14 +136,14 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
                 Padding(
                   padding: EdgeInsets.only(right: 10),
                 ),
-                Text("Pair your Braillepad",
+                Text('Pair your Braillepad',
                   style: Theme.of(context).textTheme.title.apply(fontSizeFactor: 1.3),
                 )
               ],
             ),
-            Text("Device 1"),
-            Text("Device 1"),
-            Text("Device 3"),
+            Text('Device 1'),
+            Text('Device 1'),
+            Text('Device 3'),
           ],
         ),
       ),
@@ -153,7 +159,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Text("Please configure the app",
+            Text('Please configure the app',
               style: Theme.of(context).textTheme.title,
             ),
             Padding(
@@ -179,13 +185,17 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
             switch (_mode) {
               case AppMode.Blind:
                 return BlindHome();
+
+              case AppMode.Helper:
+                return HelperHome();
+
               default:
                 return BlindHome();
             }
           }
         ));
       },
-      label: Text("Continue"),
+      label: Text('Continue'),
       icon: Icon(Icons.done),
       backgroundColor: Colors.greenAccent,
     );
@@ -195,7 +205,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Welcome"),
+        title: Text('Welcome'),
       ),
       floatingActionButton: _finish(context),
       body: ListView(

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hack_heroes_mobile/logic/app_mode.dart';
 import 'package:hack_heroes_mobile/logic/user_settings.dart';
-import 'package:hack_heroes_mobile/ui/ConfiguratorScreen.dart';
+import 'package:hack_heroes_mobile/ui/configurator_screen.dart';
 import 'package:hack_heroes_mobile/ui/blind_home.dart';
+import 'package:hack_heroes_mobile/ui/helper_home.dart';
 
 class StartupScreen extends StatelessWidget {
   Widget _startupScreen(BuildContext context, AsyncSnapshot snapshot) {
@@ -11,7 +12,7 @@ class StartupScreen extends StatelessWidget {
     if (snapshot.connectionState != ConnectionState.done) {
       return Scaffold(
         appBar: AppBar(
-          title: Text("Hack Heroes"),
+          title: Text('Hack Heroes'),
         ),
         body: Center(
           child: CircularProgressIndicator(),
@@ -25,8 +26,11 @@ class StartupScreen extends StatelessWidget {
         case AppMode.Blind:
           return BlindHome();
 
+        case AppMode.Helper:
+          return HelperHome();
+
         default:
-          return Text("How did you choose a nonexistent mode???");
+          return Text('How did you choose a nonexistent mode???');
       }
     }
 
