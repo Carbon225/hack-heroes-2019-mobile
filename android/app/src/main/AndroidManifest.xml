@@ -12,6 +12,7 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="Hack Heroes Mobile"
         android:icon="@mipmap/ic_launcher">
+        <meta-data android:name="firebase_analytics_collection_deactivated" android:value="true" />
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
