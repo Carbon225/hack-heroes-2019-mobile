@@ -37,12 +37,26 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  flutter_launcher_icons: "^0.7.3"
+
+
+flutter_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/glasses.png"
+  adaptive_icon_foreground: "assets/icon/glasses.png"
+  adaptive_icon_background: "#4287f5"
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter.
 flutter:
+
+  assets:
+    - assets/get_help.png
+    - assets/icon/glasses.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
