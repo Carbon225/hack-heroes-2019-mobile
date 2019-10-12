@@ -1,4 +1,3 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:hack_heroes_mobile/logic/app_mode.dart';
 import 'package:hack_heroes_mobile/logic/user_settings.dart';
