@@ -10,14 +10,31 @@ import 'dart:convert';
 enum Commands {
   requestSession,
   sessionFound,
-  sessionNotAvailable,
+  sessionNotFound,
   text,
+  offerHelp,
+  helpWanted,
+  helpNotWanted,
+  connectToPeer,
+  pipeTest,
 }
 
 class Packets {
 
   static final List<int> requestSession = [
     Commands.requestSession.index,
+  ];
+
+  static final List<int> offerHelp = [
+    Commands.offerHelp.index,
+  ];
+
+  static final List<int> connectToPeer = [
+    Commands.connectToPeer.index,
+  ];
+
+  static final List<int> pipeTest = [
+    Commands.pipeTest.index,
   ];
 
   static List<int> sendText(String msg) {
@@ -27,6 +44,11 @@ class Packets {
   }
 
   static Commands command(List<int> packet) {
-    return Commands.values[packet[0]];
+    try {
+      return Commands.values[packet[0]];
+    }
+    on RangeError {
+      throw('Unknown server command');
+    }
   }
 }

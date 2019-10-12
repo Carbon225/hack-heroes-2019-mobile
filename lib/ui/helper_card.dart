@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hack_heroes_mobile/client/client.dart';
 
-class GetHelpCard extends StatefulWidget {
+class HelperCard extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => GetHelpCardState();
+  State<StatefulWidget> createState() => HelperCardState();
 }
 
-class GetHelpCardState extends State<GetHelpCard> {
+class HelperCardState extends State<HelperCard> {
 
   final _appClient = AppClient();
 
@@ -17,9 +17,9 @@ class GetHelpCardState extends State<GetHelpCard> {
     super.dispose();
   }
 
-  Future<void> _getHelp() async {
+  Future<void> _offerHelp() async {
     try {
-      await _appClient.getHelp();
+      await _appClient.offerHelp();
     }
     catch (e) {
       print(e);
@@ -35,13 +35,12 @@ class GetHelpCardState extends State<GetHelpCard> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           IconButton(
-              onPressed: _getHelp,
-              alignment: Alignment.center,
-              iconSize: 200,
-              tooltip: 'Call for help',
-              icon: Image.asset('assets/get_help.png'),
+            onPressed: _offerHelp,
+            alignment: Alignment.center,
+            iconSize: 200,
+            icon: Image.asset('assets/get_help.png'),
           ),
-          Text('Call for help',
+          Text('Offer help',
             style: Theme.of(context).textTheme.title,
           )
         ],
