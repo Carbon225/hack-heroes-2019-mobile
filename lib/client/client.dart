@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:hack_heroes_mobile/client/Session.dart';
+import 'package:hack_heroes_mobile/client/connection_status.dart';
 import 'package:hack_heroes_mobile/client/packets.dart';
 import 'package:hack_heroes_mobile/client/server_api.dart';
 import 'package:hack_heroes_mobile/client/server_options.dart';
@@ -12,6 +13,7 @@ class AppClient {
   AppClient();
 
   void dispose() {
+//    _connectionStatus.close();
     _socket?.destroy();
     _session?.dispose();
     _socket = null;
@@ -33,12 +35,14 @@ class AppClient {
 
   Future<void> offerHelp() async {
     await connect();
+    _connectionStatus.add(ConnectionStatus.OfferingHelp);
     await ServerAPI.offerHelp(_socket);
     print('Offered help');
   }
 
   Future<void> getHelp() async {
     await connect();
+    _connectionStatus.add(ConnectionStatus.RequestingSession);
     await ServerAPI.requestSession(_socket);
     print('Asked for help');
   }
@@ -47,18 +51,22 @@ class AppClient {
     print('onData ${Packets.command(data)}');
     switch (Packets.command(data)) {
       case Commands.helpWanted:
+        _connectionStatus.add(ConnectionStatus.ConnectingToPeer);
         await ServerAPI.connectToPeer(_socket);
         break;
 
       case Commands.helpNotWanted:
+        _connectionStatus.add(ConnectionStatus.HelpNotWanted);
         print('Help not wanted');
         dispose();
         break;
 
       case Commands.sessionFound:
+        _connectionStatus.add(ConnectionStatus.TestingPipe);
         await ServerAPI.pipeTest(_socket);
         Future.delayed(Duration(seconds: 1), () {
           if (_session == null) {
+            _connectionStatus.add(ConnectionStatus.BrokenPipe);
             dispose();
             throw('Error creating session');
           }
@@ -66,12 +74,14 @@ class AppClient {
         break;
 
       case Commands.sessionNotFound:
+        _connectionStatus.add(ConnectionStatus.SessionNotFound);
         print('Session not found');
         dispose();
         break;
 
       case Commands.pipeTest:
         if (_session == null ) {
+          _connectionStatus.add(ConnectionStatus.Connected);
           await ServerAPI.pipeTest(_socket);
           _session = Session(_socket);
           print('SESSION CREATED');
@@ -97,6 +107,12 @@ class AppClient {
     print(error);
     dispose();
   }
+
+  Stream<ConnectionStatus> get stateStream {
+    return _connectionStatus.stream;
+  }
+
+  final _connectionStatus = StreamController<ConnectionStatus>.broadcast();
 
   Socket _socket;
   Session _session;

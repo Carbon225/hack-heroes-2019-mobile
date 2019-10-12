@@ -18,11 +18,15 @@ class HelperHome extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           HelperUserInfo(),
-          Expanded(
-            child: HelperCard(),
-          ),
-          Expanded(
-            child: GetHelpCard(),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: HelperCard(),
+              ),
+              Expanded(
+                child: GetHelpCard(),
+              ),
+            ],
           ),
         ],
       ),

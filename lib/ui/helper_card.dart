@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hack_heroes_mobile/client/client.dart';
+import 'package:hack_heroes_mobile/client/connection_status.dart';
 
 class HelperCard extends StatefulWidget {
   @override
@@ -34,10 +35,17 @@ class HelperCardState extends State<HelperCard> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+          StreamBuilder<ConnectionStatus>(
+            stream: _appClient.stateStream,
+            builder: (BuildContext context, AsyncSnapshot<ConnectionStatus> snapshot) {
+              return Text(snapshot.data.toString().split('.').last);
+            },
+            initialData: ConnectionStatus.NotConnected,
+          ),
           IconButton(
             onPressed: _offerHelp,
             alignment: Alignment.center,
-            iconSize: 200,
+            iconSize: 150,
             icon: Image.asset('assets/get_help.png'),
           ),
           Text('Offer help',
