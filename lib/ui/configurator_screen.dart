@@ -4,6 +4,7 @@ import 'package:hack_heroes_mobile/logic/app_mode.dart';
 import 'package:hack_heroes_mobile/logic/user_settings.dart';
 import 'package:hack_heroes_mobile/ui/blind_home.dart';
 import 'package:hack_heroes_mobile/ui/helper_home.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ConfiguratorScreen extends StatefulWidget {
   Widget _about(BuildContext context) {
@@ -66,6 +67,34 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<bool> _checkPermissions() async {
+    final camera = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
+    final mic = await PermissionHandler().checkPermissionStatus(PermissionGroup.microphone);
+
+    return camera == PermissionStatus.granted && mic == PermissionStatus.granted;
+  }
+
+  Widget _getPermissions(context) {
+    return FutureBuilder(
+      future: _checkPermissions(),
+      initialData: false,
+      builder: (context, AsyncSnapshot snapshot) => Container(
+        alignment: Alignment.center,
+        child: FloatingActionButton.extended(
+          backgroundColor: snapshot.data ? Colors.greenAccent : Colors.blueAccent,
+          icon: snapshot.data ? Icon(Icons.done) : Icon(Icons.perm_camera_mic),
+          label: snapshot.data ? Text('Permissions granted') : Text('Grant permissions'),
+          onPressed: snapshot.data ? null : () async {
+            await PermissionHandler().requestPermissions([
+              PermissionGroup.camera, PermissionGroup.microphone,
+            ]);
+            setState(() {});
+          },
+        ),
+      ),
+    );
   }
 
   Widget _modeSelect(BuildContext context) {
@@ -165,6 +194,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
             Padding(
               padding: EdgeInsets.only(bottom: 20),
             ),
+            _getPermissions(context),
             _modeSelect(context),
             _demoSelect(context),
           ],
@@ -174,6 +204,35 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
   }
 
   Widget _finish(BuildContext context) {
+    return FutureBuilder(
+      future: _checkPermissions(),
+      initialData: false,
+      builder: (context, AsyncSnapshot snapshot) => FloatingActionButton.extended(
+        onPressed: !snapshot.data ? null : () {
+          UserSettings.mode = _mode;
+          UserSettings.demoMode = _demoMode;
+          UserSettings.firstRun = false;
+
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) {
+                switch (_mode) {
+                  case AppMode.Blind:
+                    return BlindHome();
+
+                  case AppMode.Helper:
+                    return HelperHome();
+
+                  default:
+                    return BlindHome();
+                }
+              }
+          ));
+        },
+        label: Text('Continue'),
+        icon: Icon(Icons.done),
+        backgroundColor: snapshot.data ? Colors.greenAccent : Colors.blueAccent,
+      ),
+    );
     return FloatingActionButton.extended(
       onPressed: () {
         UserSettings.mode = _mode;
