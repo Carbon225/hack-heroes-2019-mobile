@@ -45,7 +45,7 @@ class GetHelpCardState extends State<GetHelpCard> {
           IconButton(
               onPressed: _getHelp,
               alignment: Alignment.center,
-              iconSize: 150,
+              iconSize: 200,
               tooltip: 'Call for help',
               icon: Image.asset('assets/get_help.png'),
           ),

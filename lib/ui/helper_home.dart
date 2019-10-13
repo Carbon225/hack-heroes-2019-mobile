@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hack_heroes_mobile/ui/get_help_card.dart';
 import 'package:hack_heroes_mobile/ui/helper_card.dart';
 import 'package:hack_heroes_mobile/ui/helper_user_info.dart';
+import 'package:hack_heroes_mobile/ui/network_stats_card.dart';
 import 'package:hack_heroes_mobile/ui/settings_button.dart';
 
 class HelperHome extends StatelessWidget {
@@ -14,20 +15,15 @@ class HelperHome extends StatelessWidget {
           SettingsButton(),
         ],
       ),
+      floatingActionButton: HelperCard.fab(),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           HelperUserInfo(),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: HelperCard(),
-              ),
-              Expanded(
-                child: GetHelpCard(),
-              ),
-            ],
+          Expanded(
+            child: Container(),
           ),
+          NetworkStatsCard(),
         ],
       ),
     );

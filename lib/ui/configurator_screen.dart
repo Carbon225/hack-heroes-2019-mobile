@@ -54,7 +54,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
     _demoMode = UserSettings.demoMode;
 
     _controller = AnimationController(
-      duration: Duration(milliseconds: 500),
+      duration: Duration(milliseconds: 200),
       vsync: this
     );
     _cardAnimation = MaterialPointArcTween(begin: Offset.zero, end: Offset(1.0, 0.0)).animate(_controller);

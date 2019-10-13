@@ -18,6 +18,8 @@ class AppClient {
     _session?.dispose();
     _socket = null;
     _session = null;
+
+    Future.delayed(Duration(seconds: 3), () => _connectionStatus.add(ConnectionStatus.NotConnected));
   }
 
   Future<void> connect() async {
@@ -112,7 +114,7 @@ class AppClient {
     return _connectionStatus.stream;
   }
 
-  final _connectionStatus = StreamController<ConnectionStatus>.broadcast();
+  final _connectionStatus = StreamController<ConnectionStatus>();
 
   Socket _socket;
   Session _session;
