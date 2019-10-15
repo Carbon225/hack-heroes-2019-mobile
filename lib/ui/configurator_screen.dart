@@ -233,31 +233,6 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
         backgroundColor: snapshot.data ? Colors.greenAccent : Colors.blueAccent,
       ),
     );
-    return FloatingActionButton.extended(
-      onPressed: () {
-        UserSettings.mode = _mode;
-        UserSettings.demoMode = _demoMode;
-        UserSettings.firstRun = false;
-
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) {
-            switch (_mode) {
-              case AppMode.Blind:
-                return BlindHome();
-
-              case AppMode.Helper:
-                return HelperHome();
-
-              default:
-                return BlindHome();
-            }
-          }
-        ));
-      },
-      label: Text('Continue'),
-      icon: Icon(Icons.done),
-      backgroundColor: Colors.greenAccent,
-    );
   }
 
   @override
