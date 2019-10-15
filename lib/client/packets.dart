@@ -7,11 +7,13 @@
 
 import 'dart:convert';
 
+
 enum Commands {
   requestSession,
   sessionFound,
   sessionNotFound,
   text,
+  image,
   offerHelp,
   helpWanted,
   helpNotWanted,
@@ -41,6 +43,11 @@ class Packets {
     final packet = [Commands.text.index];
     packet.addAll(utf8.encode(msg));
     return packet;
+  }
+
+  static List<int> sendImage(List<int> image) {
+    image.insert(0, Commands.image.index);
+    return image;
   }
 
   static Commands command(List<int> packet) {

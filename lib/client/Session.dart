@@ -13,5 +13,9 @@ class Session {
     _socket.add(Packets.sendText(msg));
   }
 
+  void sendImage(List<int> image) {
+    _socket.add(Packets.sendImage(image));
+  }
+
   Socket _socket;
 }
