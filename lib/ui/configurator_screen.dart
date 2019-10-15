@@ -40,7 +40,7 @@ class ConfiguratorScreen extends StatefulWidget {
   State<StatefulWidget> createState() => ConfiguratorScreenState();
 }
 
-class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTickerProviderStateMixin {
+class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProviderStateMixin {
   AppMode _mode = AppMode.Helper;
   bool _demoMode = false;
 
@@ -70,6 +70,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
   }
 
   Future<bool> _checkPermissions() async {
+//    return Future.delayed(Duration(seconds: 1), () => true);
     final camera = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
     final mic = await PermissionHandler().checkPermissionStatus(PermissionGroup.microphone);
 
@@ -80,13 +81,17 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
     return FutureBuilder(
       future: _checkPermissions(),
       initialData: false,
-      builder: (context, AsyncSnapshot snapshot) => Container(
+      builder: (context, AsyncSnapshot snapshot) => AnimatedSize(
         alignment: Alignment.center,
+        duration: Duration(milliseconds: 200),
+        reverseDuration: Duration(milliseconds: 200),
+        vsync: this,
+        curve: Curves.easeInOut,
         child: FloatingActionButton.extended(
           backgroundColor: snapshot.data ? Colors.greenAccent : Colors.blueAccent,
           icon: snapshot.data ? Icon(Icons.done) : Icon(Icons.perm_camera_mic),
           label: snapshot.data ? Text('Permissions granted') : Text('Grant permissions'),
-          onPressed: snapshot.data ? null : () async {
+          onPressed: () async {
             await PermissionHandler().requestPermissions([
               PermissionGroup.camera, PermissionGroup.microphone,
             ]);
@@ -207,13 +212,28 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
     return FutureBuilder(
       future: _checkPermissions(),
       initialData: false,
-      builder: (context, AsyncSnapshot snapshot) => FloatingActionButton.extended(
-        onPressed: !snapshot.data ? null : () {
-          UserSettings.mode = _mode;
-          UserSettings.demoMode = _demoMode;
-          UserSettings.firstRun = false;
+      builder: (context, AsyncSnapshot snapshot) => AnimatedCrossFade(
+        duration: Duration(milliseconds: 200),
+        reverseDuration: Duration(milliseconds: 200),
+        firstCurve: Curves.easeIn,
+        secondCurve: Curves.easeOut,
+        crossFadeState: snapshot.data ? CrossFadeState.showSecond : CrossFadeState.showFirst,
 
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
+        firstChild: FloatingActionButton.extended(
+          onPressed: null,
+          heroTag: 'continueDisabled',
+          label: Text('Continue'),
+          icon: Icon(Icons.done),
+          backgroundColor: Colors.blueAccent,
+        ),
+        secondChild: FloatingActionButton.extended(
+          heroTag: 'continueEnabled',
+          onPressed: () {
+            UserSettings.mode = _mode;
+            UserSettings.demoMode = _demoMode;
+            UserSettings.firstRun = false;
+
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (context) {
                 switch (_mode) {
                   case AppMode.Blind:
@@ -226,11 +246,12 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
                     return BlindHome();
                 }
               }
-          ));
-        },
-        label: Text('Continue'),
-        icon: Icon(Icons.done),
-        backgroundColor: snapshot.data ? Colors.greenAccent : Colors.blueAccent,
+            ));
+          },
+          label: Text('Continue'),
+          icon: Icon(Icons.done),
+          backgroundColor: Colors.greenAccent,
+        ),
       ),
     );
   }
@@ -246,7 +267,6 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with SingleTicke
         children: <Widget>[
           widget._about(context),
           _settings(context),
-
           SlideTransition(
             position: _cardAnimation,
             child: _pairDevice(context),
