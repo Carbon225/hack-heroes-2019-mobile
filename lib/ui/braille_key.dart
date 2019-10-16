@@ -24,10 +24,16 @@ class BrailleKey extends StatelessWidget {
           color: active ? Colors.greenAccent : Colors.blueAccent,
           borderRadius: BorderRadius.all(Radius.circular(15.0)),
         ),
-        child: Padding(
-          padding: EdgeInsets.all(10),
-          child: Text(label,
-            style: Theme.of(context).textTheme.button.apply(color: Colors.white),
+        child: SizedBox(
+          width: 70,
+          height: 50,
+          child: Center(
+            child: Text(label,
+              style: Theme.of(context).textTheme.button.apply(
+                fontSizeFactor: 1.2,
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
       ),

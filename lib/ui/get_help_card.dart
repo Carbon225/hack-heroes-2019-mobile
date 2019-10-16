@@ -6,9 +6,14 @@ import 'package:hack_heroes_mobile/client/client.dart';
 import 'package:hack_heroes_mobile/client/connection_status.dart';
 import 'package:hack_heroes_mobile/logic/camera_controller.dart';
 import 'package:hack_heroes_mobile/logic/help_image.dart';
+import 'package:hack_heroes_mobile/ui/keyboard_log.dart';
 import 'package:hack_heroes_mobile/ui/send_letter.dart';
 
 class GetHelpCard extends StatefulWidget {
+  final Stream<String> keyboardStream;
+
+  GetHelpCard(this.keyboardStream);
+
   @override
   State<StatefulWidget> createState() => GetHelpCardState();
 }
@@ -40,6 +45,7 @@ class GetHelpCardState extends State<GetHelpCard> {
   @override
   void dispose() {
     _appClient.dispose();
+    _camera.dispose();
     _sendStream.close();
     super.dispose();
   }
@@ -49,24 +55,10 @@ class GetHelpCardState extends State<GetHelpCard> {
       await _camera.initialized;
       final image = await _camera.takeImage();
       _sendStream.add(image);
-      await _appClient.getHelp();
+//      await _appClient.getHelp();
     }
     catch (e) {
       print(e);
-    }
-  }
-
-  bool _showSender() {
-    switch (_connectionStatus) {
-      case ConnectionStatus.RequestingSession:
-      case ConnectionStatus.ConnectingToPeer:
-      case ConnectionStatus.Connected:
-      case ConnectionStatus.TestingPipe:
-      case ConnectionStatus.NotConnected:
-        return true;
-
-      default:
-        return false;
     }
   }
 
@@ -74,27 +66,37 @@ class GetHelpCardState extends State<GetHelpCard> {
   Widget build(BuildContext context) {
     return Card(
       elevation: 10,
-      margin: EdgeInsets.all(10),
+      margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Text(_connectionStatus.toString().split('.').last),
-          Stack(
-            alignment: Alignment.center,
-            children: <Widget>[
-              IconButton(
-                onPressed: _getHelp,
-                alignment: Alignment.center,
-                iconSize: 200,
-                tooltip: 'Call for help',
-                icon: Image.asset('assets/get_help.png'),
-              ),
-              SendLetter(_sendStream.stream),
-            ],
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Text(_connectionStatus.toString().split('.').last),
+                Stack(
+                  alignment: Alignment.center,
+                  children: <Widget>[
+                    IconButton(
+                      onPressed: _getHelp,
+                      alignment: Alignment.center,
+                      iconSize: 200,
+                      tooltip: 'Call for help',
+                      icon: Image.asset('assets/get_help.png'),
+                    ),
+                    SendLetter(_sendStream.stream),
+                  ],
+                ),
+                Text('Call for help',
+                  style: Theme.of(context).textTheme.title,
+                ),
+              ],
+            ),
           ),
-          Text('Call for help',
-            style: Theme.of(context).textTheme.title,
-          )
+          KeyboardLog(widget.keyboardStream),
         ],
       ),
     );
