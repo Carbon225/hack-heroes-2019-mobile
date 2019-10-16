@@ -77,7 +77,7 @@ class BrailleKeyboardState extends State<BrailleKeyboard> {
                 ],
               ),
             ),
-            SizedBox(width: 20),
+            SizedBox(width: 5),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,

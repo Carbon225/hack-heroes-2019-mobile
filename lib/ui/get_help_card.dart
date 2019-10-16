@@ -10,7 +10,7 @@ import 'package:hack_heroes_mobile/ui/keyboard_log.dart';
 import 'package:hack_heroes_mobile/ui/send_letter.dart';
 
 class GetHelpCard extends StatefulWidget {
-  final Stream<String> keyboardStream;
+  final StreamController<String> keyboardStream;
 
   GetHelpCard(this.keyboardStream);
 
@@ -54,6 +54,7 @@ class GetHelpCardState extends State<GetHelpCard> {
     try {
       await _camera.initialized;
       final image = await _camera.takeImage();
+      widget.keyboardStream.add('clear');
       _sendStream.add(image);
 //      await _appClient.getHelp();
     }
@@ -96,7 +97,7 @@ class GetHelpCardState extends State<GetHelpCard> {
               ],
             ),
           ),
-          KeyboardLog(widget.keyboardStream),
+          KeyboardLog(widget.keyboardStream.stream),
         ],
       ),
     );

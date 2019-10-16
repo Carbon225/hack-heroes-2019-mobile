@@ -19,6 +19,20 @@ class KeyboardLogState extends State<KeyboardLog> with SingleTickerProviderState
   @override
   void initState() {
     _streamSubscription = widget.inputStream.listen((c) {
+      if (c == '-') {
+        if (_text.length == 1) {
+          _text = '';
+        }
+        else {
+          _text = _text.substring(0, _text.length - 2);
+        }
+        c = '';
+      }
+      else if (c == 'clear') {
+        _text = '';
+        c = '';
+      }
+
       setState(() {
         _text += c;
       });
@@ -38,11 +52,14 @@ class KeyboardLogState extends State<KeyboardLog> with SingleTickerProviderState
       elevation: 5,
       child: AnimatedSize(
         vsync: this,
-        duration: Duration(milliseconds: 50),
+        duration: Duration(milliseconds: 100),
         curve: Curves.easeInOut,
-        child: Padding(
-          padding: EdgeInsets.all(10),
-          child: Text(_text),
+        child: ConstrainedBox(
+          constraints: BoxConstraints.loose(Size.fromHeight( _text.isEmpty ? 0 : 100)),
+          child: Padding(
+            padding: EdgeInsets.all(10),
+            child: Text(_text),
+          ),
         ),
       ),
     );

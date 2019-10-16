@@ -42,7 +42,7 @@ class BlindHomeState extends State<BlindHome> {
         children: <Widget>[
           BlindUserInfo(),
           Expanded(
-            child: GetHelpCard(_keyboardController.stream),
+            child: GetHelpCard(_keyboardController),
           ),
           UserSettings.demoMode ? BrailleKeyboard(_keyboardController.add) : Container(),
 //          NetworkStatsCard(),

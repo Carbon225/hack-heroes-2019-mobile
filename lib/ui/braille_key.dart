@@ -26,7 +26,7 @@ class BrailleKey extends StatelessWidget {
         ),
         child: SizedBox(
           width: 70,
-          height: 50,
+          height: 60,
           child: Center(
             child: Text(label,
               style: Theme.of(context).textTheme.button.apply(
