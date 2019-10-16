@@ -89,7 +89,7 @@ class GetHelpCardState extends State<GetHelpCard> {
                 tooltip: 'Call for help',
                 icon: Image.asset('assets/get_help.png'),
               ),
-              SendLetter(_sendStream.stream, _showSender()),
+              SendLetter(_sendStream.stream),
             ],
           ),
           Text('Call for help',
