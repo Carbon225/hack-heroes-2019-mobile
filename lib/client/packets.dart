@@ -9,11 +9,14 @@ import 'dart:convert';
 
 
 enum Commands {
+  unknown,
   requestSession,
   sessionFound,
   sessionNotFound,
   text,
+  imageStart,
   image,
+  imageStop,
   offerHelp,
   helpWanted,
   helpNotWanted,
@@ -46,8 +49,10 @@ class Packets {
   }
 
   static List<int> sendImage(List<int> image) {
-    image.insert(0, Commands.image.index);
-    return image;
+    final packet = [Commands.imageStart.index];
+    packet.addAll(image);
+    packet.add(Commands.imageStop.index);
+    return packet;
   }
 
   static Commands command(List<int> packet) {
@@ -55,7 +60,7 @@ class Packets {
       return Commands.values[packet[0]];
     }
     on RangeError {
-      throw('Unknown server command');
+      return Commands.unknown;
     }
   }
 }

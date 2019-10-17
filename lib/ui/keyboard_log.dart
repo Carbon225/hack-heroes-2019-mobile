@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 
 class KeyboardLog extends StatefulWidget {
   final Stream<String> inputStream;
+  final Function _onClear;
 
-  KeyboardLog(this.inputStream);
+  KeyboardLog(this.inputStream, this._onClear);
 
   @override
   State<StatefulWidget> createState() => KeyboardLogState();
@@ -29,6 +30,7 @@ class KeyboardLogState extends State<KeyboardLog> with SingleTickerProviderState
         c = '';
       }
       else if (c == 'clear') {
+        widget._onClear(_text);
         _text = '';
         c = '';
       }

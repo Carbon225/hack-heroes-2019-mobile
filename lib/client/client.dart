@@ -18,8 +18,13 @@ class AppClient {
     _session?.dispose();
     _socket = null;
     _session = null;
+    _receivingImage = false;
 
     Future.delayed(Duration(seconds: 3), () => _connectionStatus.add(ConnectionStatus.NotConnected));
+  }
+
+  Session get session {
+    return _session;
   }
 
   Future<void> connect() async {
@@ -51,15 +56,18 @@ class AppClient {
 
   void _onData(List<int> data) async {
     print('onData ${Packets.command(data)}');
-    switch (Packets.command(data)) {
+
+    final command = _receivingImage ? Commands.image : Packets.command(data);
+
+    switch (command) {
       case Commands.helpWanted:
         _connectionStatus.add(ConnectionStatus.ConnectingToPeer);
         await ServerAPI.connectToPeer(_socket);
         break;
 
       case Commands.helpNotWanted:
-        _connectionStatus.add(ConnectionStatus.HelpNotWanted);
         print('Help not wanted');
+        _connectionStatus.add(ConnectionStatus.HelpNotWanted);
         dispose();
         break;
 
@@ -76,23 +84,41 @@ class AppClient {
         break;
 
       case Commands.sessionNotFound:
-        _connectionStatus.add(ConnectionStatus.SessionNotFound);
         print('Session not found');
+        _connectionStatus.add(ConnectionStatus.SessionNotFound);
         dispose();
         break;
 
       case Commands.pipeTest:
         if (_session == null ) {
-          _connectionStatus.add(ConnectionStatus.Connected);
           await ServerAPI.pipeTest(_socket);
           _session = Session(_socket);
           print('SESSION CREATED');
-          _session.sendText('Message');
+          _connectionStatus.add(ConnectionStatus.Connected);
+//          _session.sendText('Message');
         }
         break;
 
       case Commands.text:
         print('Got message: ${utf8.decode(data.sublist(1))}');
+        break;
+
+      case Commands.imageStart:
+        print('Image start');
+        _receivingImage = true;
+        _imageBuffer = data.sublist(1);
+        break;
+
+      case Commands.image:
+        if (data.last == Commands.imageStop.index) {
+          data.removeLast();
+          print('Image end');
+          _receivingImage = false;
+        }
+        else {
+          print('Image data');
+        }
+        _imageBuffer.addAll(data);
         break;
 
       default:
@@ -115,6 +141,9 @@ class AppClient {
   }
 
   final _connectionStatus = StreamController<ConnectionStatus>();
+
+  bool _receivingImage = false;
+  List<int> _imageBuffer = List<int>();
 
   Socket _socket;
   Session _session;
