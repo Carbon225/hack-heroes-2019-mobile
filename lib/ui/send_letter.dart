@@ -111,7 +111,7 @@ class SendLetterState extends State<SendLetter> with TickerProviderStateMixin {
                   }
                   return Image(
                     image: imageSnap.data,
-                    height:validSnap.data ? null : 40,
+                    height: validSnap.data ? null : 40,
                   );
                 } ,
               ),

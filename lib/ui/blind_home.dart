@@ -15,10 +15,11 @@ class BlindHome extends StatefulWidget {
 
 class BlindHomeState extends State<BlindHome> {
 
-  final _keyboardController = StreamController<String>();
+  StreamController<String> _keyboardController;
 
   @override
   void initState() {
+    _keyboardController = StreamController<String>();
     super.initState();
   }
 
