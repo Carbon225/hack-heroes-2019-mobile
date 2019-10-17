@@ -47,30 +47,44 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
   Animation<Offset> _cardAnimation;
   AnimationController _controller;
 
+  Animation<double> _scaleAnimation;
+  AnimationController _scaleController;
+
   @override
   void initState() {
-    super.initState();
-
     _mode = UserSettings.mode;
     _demoMode = UserSettings.demoMode;
 
     _controller = AnimationController(
       duration: Duration(milliseconds: 200),
-      vsync: this
+      vsync: this,
     );
     _cardAnimation = MaterialPointArcTween(begin: Offset.zero, end: Offset(1.0, 0.0)).animate(_controller);
 
+    _scaleController = AnimationController(
+      duration: Duration(milliseconds: 400),
+      vsync: this,
+      value: 1.0,
+    );
+
+    _scaleAnimation = Tween<double>(begin: 40.0, end: 0.0)
+        .chain(CurveTween(curve: Curves.easeIn))
+        .animate(_scaleController);
+
     _controller.value = _demoMode ? 1 : 0;
+
+    super.initState();
   }
 
   @override
   void dispose() {
+    _scaleController.dispose();
     _controller.dispose();
     super.dispose();
   }
 
   Future<bool> _checkPermissions() async {
-//    return Future.delayed(Duration(seconds: 1), () => true);
+//    return Future.delayed(Duration(seconds: 1), () => false);
     final camera = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
     final mic = await PermissionHandler().checkPermissionStatus(PermissionGroup.microphone);
 
@@ -80,25 +94,52 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
   Widget _getPermissions(context) {
     return FutureBuilder(
       future: _checkPermissions(),
-      initialData: false,
-      builder: (context, AsyncSnapshot snapshot) => AnimatedSize(
-        alignment: Alignment.center,
-        duration: Duration(milliseconds: 200),
-        reverseDuration: Duration(milliseconds: 200),
-        vsync: this,
-        curve: Curves.easeInOut,
-        child: FloatingActionButton.extended(
-          backgroundColor: snapshot.data ? Colors.greenAccent : Colors.blueAccent,
-          icon: snapshot.data ? Icon(Icons.done) : Icon(Icons.perm_camera_mic),
-          label: snapshot.data ? Text('Permissions granted') : Text('Grant permissions'),
-          onPressed: () async {
-            await PermissionHandler().requestPermissions([
-              PermissionGroup.camera, PermissionGroup.microphone,
-            ]);
-            setState(() {});
+      initialData: true,
+      builder: (context, AsyncSnapshot snapshot) {
+        if (snapshot.data) {
+          _scaleController.forward();
+        }
+        else {
+          _scaleController.reverse();
+        }
+        return AnimatedBuilder(
+          animation: _scaleController,
+          builder: (context, child) {
+            return ConstrainedBox(
+              constraints: BoxConstraints.loose(Size.fromHeight(_scaleAnimation.value)),
+              child: child,
+            );
           },
-        ),
-      ),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              RaisedButton(
+                textTheme: ButtonTextTheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                onPressed: () async {
+                  await PermissionHandler().requestPermissions([
+                    PermissionGroup.camera, PermissionGroup.microphone,
+                  ]);
+                  if (await _checkPermissions()) {
+                    _scaleController.forward();
+                  }
+                },
+                elevation: 10,
+                color: Colors.blueAccent,
+                child: Row(
+                  children: <Widget>[
+                    Icon(Icons.perm_camera_mic),
+                    Text('Grant permissions'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -227,7 +268,6 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
           backgroundColor: Colors.blueAccent,
         ),
         secondChild: FloatingActionButton.extended(
-          heroTag: 'continueEnabled',
           onPressed: () {
             UserSettings.mode = _mode;
             UserSettings.demoMode = _demoMode;
