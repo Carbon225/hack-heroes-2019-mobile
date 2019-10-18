@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hack_heroes_mobile/client/client.dart';
-import 'package:hack_heroes_mobile/client/connection_status.dart';
 import 'package:hack_heroes_mobile/logic/camera_controller.dart';
 import 'package:hack_heroes_mobile/logic/help_image.dart';
 import 'package:hack_heroes_mobile/ui/keyboard_log.dart';
@@ -21,23 +20,11 @@ class GetHelpCard extends StatefulWidget {
 
 class GetHelpCardState extends State<GetHelpCard> {
 
-  static Future<List<int>> _imageToBytes(HelpImage image) async {
-    if (await image.valid) {
-      final file = File(image.path);
-      return await file.readAsBytes();
-    }
-    else {
-      throw('Image missing');
-    }
-  }
-
   String _lastText = '';
-  HelpImage _lastImage = HelpImage.missing();
   CameraWrapper _camera;
   AppClient _appClient;
   AppClient _remoteClient;
   StreamController<HelpImage> _sendStream;
-  ConnectionStatus _connectionStatus = ConnectionStatus.NotConnected;
 
   @override
   void initState() {
@@ -45,17 +32,7 @@ class GetHelpCardState extends State<GetHelpCard> {
     _appClient = AppClient();
     _camera = CameraWrapper();
 
-    _appClient.stateStream.listen((status) async {
-      if (status == ConnectionStatus.Connected) {
-        _appClient.session.sendText(_lastText);
-        _appClient.session.sendImage(await _imageToBytes(_lastImage));
-      }
-      if (!mounted)
-        return;
-      setState(() => _connectionStatus = status);
-    });
-
-    _sendStream = StreamController<HelpImage>.broadcast();
+    _sendStream = StreamController<HelpImage>();
 
     // prevents animation lag
     Future.delayed(Duration(milliseconds: 200), _camera.init);
@@ -75,8 +52,23 @@ class GetHelpCardState extends State<GetHelpCard> {
   Future<void> _getHelp() async {
     try {
       await _camera.initialized;
-      _lastImage = await _camera.takeImage();
+      final image = await _camera.takeImage();
+//      _sendStream.add(image);
       widget.keyboardStream.add('clear');
+      await Future.delayed(Duration(milliseconds: 10), () async {
+        await _appClient.getHelp(_lastText, image);
+      });
+
+      await Future.delayed(Duration(milliseconds: 500), () async {
+        final helpRequest = await _remoteClient.helpNeeded();
+        if (helpRequest != null) {
+          print('Helping ${helpRequest.id}');
+          _remoteClient.offerHelp(helpRequest, 'I AM HELP');
+        }
+        else {
+          print('Help not needed');
+        }
+      });
     }
     catch (e) {
       print(e);
@@ -85,9 +77,6 @@ class GetHelpCardState extends State<GetHelpCard> {
 
   Future<void> _onKeyboardClear(String text) async {
     _lastText = text;
-    _sendStream.add(_lastImage);
-    await _appClient.getHelp();
-    await Future.delayed(Duration(milliseconds: 100), _remoteClient.offerHelp);
   }
 
   @override
@@ -104,7 +93,6 @@ class GetHelpCardState extends State<GetHelpCard> {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Text(_connectionStatus.toString().split('.').last),
                 Stack(
                   alignment: Alignment.center,
                   children: <Widget>[

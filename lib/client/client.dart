@@ -2,149 +2,129 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:hack_heroes_mobile/client/Session.dart';
-import 'package:hack_heroes_mobile/client/connection_status.dart';
-import 'package:hack_heroes_mobile/client/packets.dart';
-import 'package:hack_heroes_mobile/client/server_api.dart';
+import 'package:hack_heroes_mobile/client/help_request.dart';
 import 'package:hack_heroes_mobile/client/server_options.dart';
+import 'package:hack_heroes_mobile/client/session.dart';
+import 'package:hack_heroes_mobile/logic/help_image.dart';
+
+/*
+
+POST /getHelp {text, image}
+Server create request with id
+Response {id, place in queue}
+
+WebSocket -> /ws
+send id
+Server assign socket to request with id
+
+GET /helpNeeded
+Response {needed, id, text, image}
+Client ask user
+
+POST /offerHelp {id, text}
+Server find request with id
+Send text -> request.socket
+Remove request
+
+ */
 
 
 class AppClient {
   AppClient();
 
   void dispose() {
-//    _connectionStatus.close();
-    _socket?.destroy();
-    _session?.dispose();
-    _socket = null;
-    _session = null;
-    _receivingImage = false;
 
-    Future.delayed(Duration(seconds: 3), () => _connectionStatus.add(ConnectionStatus.NotConnected));
   }
 
-  Session get session {
-    return _session;
-  }
+  Future<HelpRequest> helpNeeded() async {
+    final request = await HttpClient().get(ServerOptions.Host, ServerOptions.Port, ServerOptions.HelpNeeded);
+    final response = await request.close();
 
-  Future<void> connect() async {
-    if (_socket != null) {
-      dispose();
-    }
-
-    _socket = await Socket.connect(ServerOptions.address, ServerOptions.port);
-    _socket.listen(
-      _onData,
-      onDone: _onDone,
-      onError: _onError,
-    );
-  }
-
-  Future<void> offerHelp() async {
-    await connect();
-    _connectionStatus.add(ConnectionStatus.OfferingHelp);
-    await ServerAPI.offerHelp(_socket);
-    print('Offered help');
-  }
-
-  Future<void> getHelp() async {
-    await connect();
-    _connectionStatus.add(ConnectionStatus.RequestingSession);
-    await ServerAPI.requestSession(_socket);
-    print('Asked for help');
-  }
-
-  void _onData(List<int> data) async {
-    print('onData ${Packets.command(data)}');
-
-    final command = _receivingImage ? Commands.image : Packets.command(data);
-
-    switch (command) {
-      case Commands.helpWanted:
-        _connectionStatus.add(ConnectionStatus.ConnectingToPeer);
-        await ServerAPI.connectToPeer(_socket);
-        break;
-
-      case Commands.helpNotWanted:
-        print('Help not wanted');
-        _connectionStatus.add(ConnectionStatus.HelpNotWanted);
-        dispose();
-        break;
-
-      case Commands.sessionFound:
-        _connectionStatus.add(ConnectionStatus.TestingPipe);
-        await ServerAPI.pipeTest(_socket);
-        Future.delayed(Duration(seconds: 1), () {
-          if (_session == null) {
-            _connectionStatus.add(ConnectionStatus.BrokenPipe);
-            dispose();
-            throw('Error creating session');
+    switch (response.statusCode) {
+      case HttpStatus.ok:
+        final data = await _decodeResponse(response);
+        if (data['status'] == 'ok') {
+          if (data['needed'] == false) {
+            print('Help not needed');
+            return null;
           }
-        });
-        break;
-
-      case Commands.sessionNotFound:
-        print('Session not found');
-        _connectionStatus.add(ConnectionStatus.SessionNotFound);
-        dispose();
-        break;
-
-      case Commands.pipeTest:
-        if (_session == null ) {
-          await ServerAPI.pipeTest(_socket);
-          _session = Session(_socket);
-          print('SESSION CREATED');
-          _connectionStatus.add(ConnectionStatus.Connected);
-//          _session.sendText('Message');
-        }
-        break;
-
-      case Commands.text:
-        print('Got message: ${utf8.decode(data.sublist(1))}');
-        break;
-
-      case Commands.imageStart:
-        print('Image start');
-        _receivingImage = true;
-        _imageBuffer = data.sublist(1);
-        break;
-
-      case Commands.image:
-        if (data.last == Commands.imageStop.index) {
-          data.removeLast();
-          print('Image end');
-          _receivingImage = false;
+          else {
+//            final image = HelpImage.fromBase64(data['image']);
+            return HelpRequest(data['id'], data['text'], null);
+          }
         }
         else {
-          print('Image data');
+          print('Response error ${data['status']}');
+          return null;
         }
-        _imageBuffer.addAll(data);
         break;
 
       default:
-        throw('Unknown command');
+        print('HTTP error ${response.statusCode}');
+        return null;
     }
   }
 
-  void _onDone() {
-    print('onDone');
-    dispose();
+  Future<void> offerHelp(HelpRequest helpRequest, String text) async {
+    final request = await HttpClient().postUrl(
+        Uri.parse('https://${ServerOptions.Host}:${ServerOptions.Port}${ServerOptions.OfferHelp}')
+    );
+
+    request
+      ..headers.contentType = ContentType.json
+      ..write(jsonEncode({
+        'id': helpRequest.id,
+        'text': text
+      }));
+
+    await request.close();
   }
 
-  void _onError(error, StackTrace trace) {
-    print(error);
-    dispose();
+  Future<void> getHelp(String text, HelpImage image) async {
+    try {
+      final session = await _requestHelp(text, image);
+      print('Got session ${session.id}}');
+      await session.connect();
+    }
+    catch (e) {
+      print('Error getting help: $e');
+    }
   }
 
-  Stream<ConnectionStatus> get stateStream {
-    return _connectionStatus.stream;
+  Future<Session> _requestHelp(String text, HelpImage image) async {
+    final request = await HttpClient().postUrl(
+      Uri.parse('https://${ServerOptions.Host}:${ServerOptions.Port}${ServerOptions.GetHelp}')
+    );
+
+    request
+      ..headers.contentType = ContentType.json
+      ..write(jsonEncode({
+        'text': text,
+        'image': base64Encode(await image.bytes)
+      }));
+
+    final response = await request.close();
+
+    switch (response.statusCode) {
+      case HttpStatus.ok:
+        final data = await _decodeResponse(response);
+        if (data['status'] == 'ok') {
+          final place = data['placeInQueue'] as int;
+          print('In queue: $place');
+          final id = data['id'] as String;
+          return Session(id);
+        }
+        else {
+          throw('Response error ${data['status']}');
+        }
+        break;
+
+      default:
+        throw('HTTP error ${response.statusCode}');
+    }
   }
 
-  final _connectionStatus = StreamController<ConnectionStatus>();
-
-  bool _receivingImage = false;
-  List<int> _imageBuffer = List<int>();
-
-  Socket _socket;
-  Session _session;
+  Future<Map<String, dynamic>> _decodeResponse(HttpClientResponse response) async {
+    return jsonDecode(await utf8.decoder.bind(response).join());
+  }
 }

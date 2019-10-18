@@ -8,7 +8,8 @@ class HelpImage {
   HelpImage.missing()
       : _path = 'null',
         _validFuture = Future.value(false),
-        _imageFuture = Future.value(Missing);
+        _imageFuture = Future.value(Missing),
+        _bytesFuture = Future.error('File not found');
 
   HelpImage.fromFile(this._path)
       : _validFuture = File(_path).exists(),
@@ -18,6 +19,14 @@ class HelpImage {
           }
           else {
             return Missing;
+          }
+        }),
+        _bytesFuture = Future(() async {
+          if (await File(_path).exists()) {
+            return File(_path).readAsBytes();
+          }
+          else {
+            return Future.error('File not found');
           }
         });
 
@@ -33,7 +42,12 @@ class HelpImage {
     return _imageFuture;
   }
 
+  Future<List<int>> get bytes {
+    return _bytesFuture;
+  }
+
   final String _path;
   final Future<bool> _validFuture;
   final Future<ImageProvider> _imageFuture;
+  final Future<List<int>> _bytesFuture;
 }

@@ -1,4 +1,8 @@
 class ServerOptions {
-  static final address = '192.168.2.36';
-  static final port = 9090;
+  static const Host = '****************';
+  static const Port = 443;
+  static const GetHelp = '/getHelp';
+  static const OfferHelp = '/offerHelp';
+  static const HelpNeeded = '/helpNeeded';
+  static const WebSocket = '/ws';
 }
