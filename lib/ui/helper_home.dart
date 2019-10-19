@@ -1,10 +1,37 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:hack_heroes_mobile/client/help_request.dart';
 import 'package:hack_heroes_mobile/ui/helper_card.dart';
-import 'package:hack_heroes_mobile/ui/helper_user_info.dart';
+import 'package:hack_heroes_mobile/ui/incoming_request.dart';
 import 'package:hack_heroes_mobile/ui/network_stats_card.dart';
 import 'package:hack_heroes_mobile/ui/settings_button.dart';
 
-class HelperHome extends StatelessWidget {
+class HelperHome extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => HelperHomeState();
+}
+
+class HelperHomeState extends State<HelperHome> {
+
+  StreamController<HelpRequest> _receivingStream;
+
+  @override
+  void initState() {
+    _receivingStream = StreamController<HelpRequest>();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _receivingStream.close();
+    super.dispose();
+  }
+
+  Future<void> _onHelpNeeded(HelpRequest request) async {
+    _receivingStream.add(request);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,13 +41,12 @@ class HelperHome extends StatelessWidget {
           SettingsButton(),
         ],
       ),
-      floatingActionButton: HelperCard.fab(),
+      floatingActionButton: HelperCard.fab(_onHelpNeeded),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          HelperUserInfo(),
           Expanded(
-            child: Container(),
+            child: IncomingRequest(_receivingStream.stream),
           ),
           NetworkStatsCard(),
         ],

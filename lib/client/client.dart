@@ -6,6 +6,7 @@ import 'package:hack_heroes_mobile/client/help_request.dart';
 import 'package:hack_heroes_mobile/client/server_options.dart';
 import 'package:hack_heroes_mobile/client/session.dart';
 import 'package:hack_heroes_mobile/logic/help_image.dart';
+import 'package:path_provider/path_provider.dart';
 
 /*
 
@@ -33,11 +34,17 @@ class AppClient {
   AppClient();
 
   void dispose() {
+    _session?.dispose();
+  }
 
+  Future<String> get response {
+    return _session.response;
   }
 
   Future<HelpRequest> helpNeeded() async {
-    final request = await HttpClient().get(ServerOptions.Host, ServerOptions.Port, ServerOptions.HelpNeeded);
+    final request = await HttpClient().getUrl(
+        Uri.parse('https://${ServerOptions.Host}:${ServerOptions.Port}${ServerOptions.HelpNeeded}')
+    );
     final response = await request.close();
 
     switch (response.statusCode) {
@@ -45,12 +52,17 @@ class AppClient {
         final data = await _decodeResponse(response);
         if (data['status'] == 'ok') {
           if (data['needed'] == false) {
-            print('Help not needed');
             return null;
           }
           else {
-//            final image = HelpImage.fromBase64(data['image']);
-            return HelpRequest(data['id'], data['text'], null);
+            final tempDir = (await getApplicationDocumentsDirectory()).path;
+            final imgPath = '$tempDir/${DateTime.now()}.png';
+
+            final imgFile = File(imgPath).openWrite();
+            imgFile.add(base64Decode(data['image']));
+            imgFile.close();
+
+            return HelpRequest(data['id'], data['text'], HelpImage.fromFile(imgPath));
           }
         }
         else {
@@ -82,9 +94,9 @@ class AppClient {
 
   Future<void> getHelp(String text, HelpImage image) async {
     try {
-      final session = await _requestHelp(text, image);
-      print('Got session ${session.id}}');
-      await session.connect();
+      _session = await _requestHelp(text, image);
+      print('Got session ${_session.id}}');
+      await _session.connect();
     }
     catch (e) {
       print('Error getting help: $e');
@@ -127,4 +139,6 @@ class AppClient {
   Future<Map<String, dynamic>> _decodeResponse(HttpClientResponse response) async {
     return jsonDecode(await utf8.decoder.bind(response).join());
   }
+
+  Session _session;
 }

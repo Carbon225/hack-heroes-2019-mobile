@@ -6,9 +6,10 @@ import 'package:hack_heroes_mobile/client/client.dart';
 
 class HelperCard extends StatefulWidget {
   final bool _fabMode;
+  final Function _onHelpNeeded;
 
-  HelperCard() : _fabMode = false;
-  HelperCard.fab() : _fabMode = true;
+  HelperCard(this._onHelpNeeded) : _fabMode = false;
+  HelperCard.fab(this._onHelpNeeded) : _fabMode = true;
 
   @override
   State<StatefulWidget> createState() => HelperCardState();
@@ -46,6 +47,16 @@ class HelperCardState extends State<HelperCard> with SingleTickerProviderStateMi
     }
   }
 
+  Future<void> _checkHelp() async {
+    final helpRequest = await _appClient.helpNeeded();
+    if (helpRequest == null) {
+      print('Help not needed');
+      return;
+    }
+
+    widget._onHelpNeeded(helpRequest);
+  }
+
   Widget _card(context) {
     return Card(
       elevation: 10,
@@ -67,11 +78,12 @@ class HelperCardState extends State<HelperCard> with SingleTickerProviderStateMi
       ),
     );
   }
+
   Widget _fab(context) {
     return SlideTransition(
       position: _fabAnimation,
       child: FloatingActionButton.extended(
-        onPressed: _offerHelp,
+        onPressed: _checkHelp,
         icon: Transform(
           transform: Matrix4.translationValues(-10, 0, 0),
           child: Image.asset('assets/get_help.png',

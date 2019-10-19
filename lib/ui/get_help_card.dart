@@ -53,25 +53,17 @@ class GetHelpCardState extends State<GetHelpCard> {
     try {
       await _camera.initialized;
       final image = await _camera.takeImage();
-//      _sendStream.add(image);
+      _sendStream.add(image);
       widget.keyboardStream.add('clear');
       await Future.delayed(Duration(milliseconds: 10), () async {
+        print('Getting session');
         await _appClient.getHelp(_lastText, image);
-      });
-
-      await Future.delayed(Duration(milliseconds: 500), () async {
-        final helpRequest = await _remoteClient.helpNeeded();
-        if (helpRequest != null) {
-          print('Helping ${helpRequest.id}');
-          _remoteClient.offerHelp(helpRequest, 'I AM HELP');
-        }
-        else {
-          print('Help not needed');
-        }
+        final response = await _appClient.response;
+        print('Got help $response');
       });
     }
     catch (e) {
-      print(e);
+      print('Error getting session: $e');
     }
   }
 
