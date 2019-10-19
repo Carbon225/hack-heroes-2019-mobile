@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:hack_heroes_mobile/client/help_request.dart';
+import 'package:hack_heroes_mobile/logic/firebase_notifications.dart';
 import 'package:hack_heroes_mobile/ui/helper_card.dart';
 import 'package:hack_heroes_mobile/ui/incoming_request.dart';
-import 'package:hack_heroes_mobile/ui/network_stats_card.dart';
 import 'package:hack_heroes_mobile/ui/settings_button.dart';
 
 class HelperHome extends StatefulWidget {
@@ -16,9 +16,12 @@ class HelperHomeState extends State<HelperHome> {
 
   StreamController<HelpRequest> _receivingStream;
 
+  final FirebaseNotifications _firebaseClient = FirebaseNotifications();
+
   @override
   void initState() {
     _receivingStream = StreamController<HelpRequest>();
+    _firebaseClient.init();
     super.initState();
   }
 
@@ -48,7 +51,9 @@ class HelperHomeState extends State<HelperHome> {
           Expanded(
             child: IncomingRequest(_receivingStream.stream),
           ),
-          NetworkStatsCard(),
+          SizedBox(
+            height: 50,
+          ),
         ],
       ),
     );

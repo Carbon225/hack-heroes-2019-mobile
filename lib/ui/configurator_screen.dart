@@ -86,9 +86,8 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
   Future<bool> _checkPermissions() async {
 //    return Future.delayed(Duration(seconds: 1), () => false);
     final camera = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
-    final mic = await PermissionHandler().checkPermissionStatus(PermissionGroup.microphone);
 
-    return camera == PermissionStatus.granted && mic == PermissionStatus.granted;
+    return camera == PermissionStatus.granted;
   }
 
   Widget _getPermissions(context) {
@@ -121,7 +120,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
                 ),
                 onPressed: () async {
                   await PermissionHandler().requestPermissions([
-                    PermissionGroup.camera, PermissionGroup.microphone,
+                    PermissionGroup.camera,
                   ]);
                   if (await _checkPermissions()) {
                     _scaleController.forward();
@@ -261,16 +260,27 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
     );
   }
 
+  Future<bool> _canContinue() async {
+    if (_mode == AppMode.Helper) {
+      return true;
+    }
+    // Blind mode
+    if (_demoMode && await _checkPermissions()) {
+      return true;
+    }
+    return false;
+  }
+
   Widget _finish(BuildContext context) {
     return FutureBuilder(
-      future: _checkPermissions(),
+      future: _canContinue(),
       initialData: false,
       builder: (context, AsyncSnapshot snapshot) => AnimatedCrossFade(
         duration: Duration(milliseconds: 200),
         reverseDuration: Duration(milliseconds: 200),
         firstCurve: Curves.easeIn,
         secondCurve: Curves.easeOut,
-        crossFadeState: snapshot.data && _demoMode ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+        crossFadeState: snapshot.data ? CrossFadeState.showSecond : CrossFadeState.showFirst,
 
         firstChild: FloatingActionButton.extended(
           clipBehavior: Clip.antiAlias,
