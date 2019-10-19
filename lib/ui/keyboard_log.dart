@@ -60,7 +60,9 @@ class KeyboardLogState extends State<KeyboardLog> with SingleTickerProviderState
           constraints: BoxConstraints.loose(Size.fromHeight( _text.isEmpty ? 0 : 100)),
           child: Padding(
             padding: EdgeInsets.all(10),
-            child: Text(_text),
+            child: Text(_text,
+              style: Theme.of(context).textTheme.subtitle,
+            ),
           ),
         ),
       ),

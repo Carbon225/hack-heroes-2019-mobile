@@ -47,7 +47,9 @@ class BlindHomeState extends State<BlindHome> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           KeyboardLog(_responseController.stream.map((text) {
-            Future.delayed(Duration(seconds: 3), () => _responseController.add('clear'));
+            if (text != 'clear') {
+              Future.delayed(Duration(seconds: 3), () => _responseController.add('clear'));
+            }
             return text;
           }), (text) {}),
           Expanded(

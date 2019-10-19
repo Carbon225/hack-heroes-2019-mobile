@@ -126,6 +126,8 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
                   if (await _checkPermissions()) {
                     _scaleController.forward();
                   }
+                  // refresh continue button
+                  setState(() {});
                 },
                 elevation: 10,
                 color: Colors.blueAccent,
@@ -145,6 +147,8 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
 
   Widget _modeSelect(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Padding(
           padding: EdgeInsets.only(left: 10, right: 32),
@@ -157,23 +161,28 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
           style: Theme.of(context).textTheme.subhead,//.apply(fontSizeFactor: 1.2),
         ),
         Expanded(
-          child: RadioListTile(
-            title: Text('Blind',
-                style: Theme.of(context).textTheme.button
-            ),
-            value: AppMode.Blind,
-            groupValue: _mode,
-            onChanged: (mode) => setState(() => _mode = mode),
-          ),
+          child: Container(),
         ),
         Expanded(
-          child: RadioListTile(
-            title: Text('Helper',
-              style: Theme.of(context).textTheme.button,
-            ),
-            value: AppMode.Helper,
-            groupValue: _mode,
-            onChanged: (mode) => setState(() => _mode = mode),
+          child: Column(
+            children: <Widget>[
+              RadioListTile(
+                title: Text('Blind',
+                    style: Theme.of(context).textTheme.button
+                ),
+                value: AppMode.Blind,
+                groupValue: _mode,
+                onChanged: (mode) => setState(() => _mode = mode),
+              ),
+              RadioListTile(
+                title: Text('Helper',
+                  style: Theme.of(context).textTheme.button,
+                ),
+                value: AppMode.Helper,
+                groupValue: _mode,
+                onChanged: (mode) => setState(() => _mode = mode),
+              ),
+            ],
           ),
         ),
       ],
@@ -237,11 +246,14 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
             Text('Please configure the app',
               style: Theme.of(context).textTheme.title,
             ),
-            Padding(
-              padding: EdgeInsets.only(bottom: 20),
+            Divider(
+              height: 20,
             ),
             _getPermissions(context),
             _modeSelect(context),
+            Divider(
+              height: 5,
+            ),
             _demoSelect(context),
           ],
         ),
@@ -258,9 +270,10 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
         reverseDuration: Duration(milliseconds: 200),
         firstCurve: Curves.easeIn,
         secondCurve: Curves.easeOut,
-        crossFadeState: snapshot.data ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+        crossFadeState: snapshot.data && _demoMode ? CrossFadeState.showSecond : CrossFadeState.showFirst,
 
         firstChild: FloatingActionButton.extended(
+          clipBehavior: Clip.antiAlias,
           onPressed: null,
           heroTag: 'continueDisabled',
           label: Text('Continue'),
@@ -268,6 +281,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
           backgroundColor: Colors.blueAccent,
         ),
         secondChild: FloatingActionButton.extended(
+          clipBehavior: Clip.antiAlias,
           onPressed: () {
             UserSettings.mode = _mode;
             UserSettings.demoMode = _demoMode;
