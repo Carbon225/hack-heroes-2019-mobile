@@ -11,8 +11,9 @@ import 'package:hack_heroes_mobile/ui/send_letter.dart';
 
 class GetHelpCard extends StatefulWidget {
   final StreamController<String> keyboardStream;
+  final Function onResponse;
 
-  GetHelpCard(this.keyboardStream);
+  GetHelpCard(this.keyboardStream, this.onResponse);
 
   @override
   State<StatefulWidget> createState() => GetHelpCardState();
@@ -23,12 +24,10 @@ class GetHelpCardState extends State<GetHelpCard> {
   String _lastText = '';
   CameraWrapper _camera;
   AppClient _appClient;
-  AppClient _remoteClient;
   StreamController<HelpImage> _sendStream;
 
   @override
   void initState() {
-    _remoteClient = AppClient();
     _appClient = AppClient();
     _camera = CameraWrapper();
 
@@ -42,7 +41,6 @@ class GetHelpCardState extends State<GetHelpCard> {
 
   @override
   void dispose() {
-    _remoteClient.dispose();
     _appClient.dispose();
     _camera.dispose();
     _sendStream.close();
@@ -57,9 +55,11 @@ class GetHelpCardState extends State<GetHelpCard> {
       widget.keyboardStream.add('clear');
       await Future.delayed(Duration(milliseconds: 10), () async {
         print('Getting session');
+        _appClient.dispose();
         await _appClient.getHelp(_lastText, image);
         final response = await _appClient.response;
         print('Got help $response');
+        widget.onResponse(response);
       });
     }
     catch (e) {
@@ -75,7 +75,7 @@ class GetHelpCardState extends State<GetHelpCard> {
   Widget build(BuildContext context) {
     return Card(
       elevation: 10,
-      margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
+      margin: EdgeInsets.all(10),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

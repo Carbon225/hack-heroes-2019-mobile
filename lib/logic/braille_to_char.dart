@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 const BrailleToChar = <String, String>{
   '100000': 'A',
   '110000': 'B',
@@ -26,4 +28,26 @@ const BrailleToChar = <String, String>{
   '101111': 'Y',
   '101011': 'Z',
   '001111': '#',
+  '001000': ' '
 };
+
+List<int> charToBraille(String c) {
+  c = c.toUpperCase();
+
+  try {
+    final indexOfChar = utf8.encode(c)[0] - utf8.encode('A')[0];
+    final braille = BrailleToChar.keys.elementAt(indexOfChar);
+
+    final bits = braille.split('').map((e) => int.parse(e)).toList();
+    return bits;
+  }
+  on RangeError {
+
+  }
+  catch (e) {
+    print('Braille encoding error $e');
+  }
+
+  // return space
+  return <int>[0, 0, 1, 0, 0, 0];
+}

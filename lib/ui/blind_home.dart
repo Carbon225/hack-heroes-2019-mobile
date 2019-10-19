@@ -5,6 +5,7 @@ import 'package:hack_heroes_mobile/logic/user_settings.dart';
 import 'package:hack_heroes_mobile/ui/blind_user_info.dart';
 import 'package:hack_heroes_mobile/ui/braille_keyboard.dart';
 import 'package:hack_heroes_mobile/ui/get_help_card.dart';
+import 'package:hack_heroes_mobile/ui/keyboard_log.dart';
 import 'package:hack_heroes_mobile/ui/network_stats_card.dart';
 import 'package:hack_heroes_mobile/ui/settings_button.dart';
 
@@ -16,16 +17,20 @@ class BlindHome extends StatefulWidget {
 class BlindHomeState extends State<BlindHome> {
 
   StreamController<String> _keyboardController;
+  StreamController<String> _responseController;
 
   @override
   void initState() {
     _keyboardController = StreamController<String>();
+    _responseController = StreamController<String>.broadcast();
+
     super.initState();
   }
 
   @override
   void dispose() {
     _keyboardController.close();
+    _responseController.close();
     super.dispose();
   }
 
@@ -41,12 +46,20 @@ class BlindHomeState extends State<BlindHome> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          BlindUserInfo(),
+          KeyboardLog(_responseController.stream.map((text) {
+            Future.delayed(Duration(seconds: 3), () => _responseController.add('clear'));
+            return text;
+          }), (text) {}),
           Expanded(
-            child: GetHelpCard(_keyboardController),
+            child: GetHelpCard(
+              _keyboardController,
+              _responseController.add
+            ),
           ),
-          UserSettings.demoMode ? BrailleKeyboard(_keyboardController.add) : Container(),
-//          NetworkStatsCard(),
+          UserSettings.demoMode ? BrailleKeyboard(
+            _keyboardController.add,
+            _responseController.stream,
+          ) : Container(),
         ],
       ),
     );

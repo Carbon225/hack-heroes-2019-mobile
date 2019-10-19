@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 
@@ -7,8 +8,9 @@ import 'package:hack_heroes_mobile/ui/braille_key.dart';
 
 class BrailleKeyboard extends StatefulWidget {
   final Function onChar;
+  final Stream<String> responseStream;
 
-  BrailleKeyboard(this.onChar);
+  BrailleKeyboard(this.onChar, this.responseStream);
 
   @override
   State<StatefulWidget> createState() => BrailleKeyboardState();
@@ -18,6 +20,36 @@ class BrailleKeyboardState extends State<BrailleKeyboard> {
 
   var _buttonStates = List<int>.filled(6, 0);
   var _char = List<int>.filled(6, 0);
+
+  StreamSubscription _subscription;
+
+  @override
+  void initState() {
+    _subscription = widget.responseStream.listen((response) async {
+      if (response == 'clear') {
+        // ignore clear meant for the response display (top widget)
+        return;
+      }
+      print('Keyboard print $response');
+      for (final char in response.split('')) {
+        setState(() {
+          _buttonStates = charToBraille(char);
+        });
+        await Future.delayed(Duration(milliseconds: 500));
+        setState(() {
+          _buttonStates.fillRange(0, 6, 0);
+        });
+        await Future.delayed(Duration(milliseconds: 500));
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
 
   void _handleMultiTouch(int id, var event) {
     if (event is TapDownDetails) {
