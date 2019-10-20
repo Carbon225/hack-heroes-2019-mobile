@@ -50,6 +50,9 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
   Animation<double> _scaleAnimation;
   AnimationController _scaleController;
 
+  Animation<Color> _finishColorAnimation;
+  AnimationController _finishColorController;
+
   @override
   void initState() {
     _mode = UserSettings.mode;
@@ -58,6 +61,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
     _controller = AnimationController(
       duration: Duration(milliseconds: 200),
       vsync: this,
+      value: _demoMode ? 1 : 0,
     );
     _cardAnimation = MaterialPointArcTween(begin: Offset.zero, end: Offset(1.0, 0.0)).animate(_controller);
 
@@ -71,7 +75,13 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
         .chain(CurveTween(curve: Curves.easeIn))
         .animate(_scaleController);
 
-    _controller.value = _demoMode ? 1 : 0;
+    _finishColorController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+
+    _finishColorAnimation = ColorTween(begin: Colors.blueAccent, end: Colors.greenAccent).animate(_finishColorController);
+
 
     super.initState();
   }
@@ -102,7 +112,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
           _scaleController.reverse();
         }
         return AnimatedBuilder(
-          animation: _scaleController,
+          animation: _scaleAnimation,
           builder: (context, child) {
             return ConstrainedBox(
               constraints: BoxConstraints.loose(Size.fromHeight(_scaleAnimation.value)),
@@ -275,48 +285,42 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
     return FutureBuilder(
       future: _canContinue(),
       initialData: false,
-      builder: (context, AsyncSnapshot snapshot) => AnimatedCrossFade(
-        duration: Duration(milliseconds: 200),
-        reverseDuration: Duration(milliseconds: 200),
-        firstCurve: Curves.easeIn,
-        secondCurve: Curves.easeOut,
-        crossFadeState: snapshot.data ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+      builder: (context, AsyncSnapshot snapshot) {
+        if (snapshot.data) {
+          _finishColorController.forward();
+        }
+        else {
+          _finishColorController.reverse();
+        }
+        return AnimatedBuilder(
+          animation: _finishColorAnimation,
+          builder: (context, child) => FloatingActionButton.extended(
+            onPressed: !snapshot.data ? null : () {
+              UserSettings.mode = _mode;
+              UserSettings.demoMode = _demoMode;
+              UserSettings.firstRun = false;
 
-        firstChild: FloatingActionButton.extended(
-          clipBehavior: Clip.antiAlias,
-          onPressed: null,
-          heroTag: 'continueDisabled',
-          label: Text('Continue'),
-          icon: Icon(Icons.done),
-          backgroundColor: Colors.blueAccent,
-        ),
-        secondChild: FloatingActionButton.extended(
-          clipBehavior: Clip.antiAlias,
-          onPressed: () {
-            UserSettings.mode = _mode;
-            UserSettings.demoMode = _demoMode;
-            UserSettings.firstRun = false;
+              Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (context) {
+                    switch (_mode) {
+                      case AppMode.Blind:
+                        return BlindHome();
 
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (context) {
-                switch (_mode) {
-                  case AppMode.Blind:
-                    return BlindHome();
+                      case AppMode.Helper:
+                        return HelperHome();
 
-                  case AppMode.Helper:
-                    return HelperHome();
-
-                  default:
-                    return BlindHome();
-                }
-              }
-            ));
-          },
-          label: Text('Continue'),
-          icon: Icon(Icons.done),
-          backgroundColor: Colors.greenAccent,
-        ),
-      ),
+                      default:
+                        return BlindHome();
+                    }
+                  }
+              ));
+            },
+            label: Text('Continue'),
+            icon: Icon(Icons.done),
+            backgroundColor: _finishColorAnimation.value,
+          ),
+        );
+      },
     );
   }
 
