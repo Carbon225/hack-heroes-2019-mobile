@@ -16,12 +16,9 @@ class HelperHomeState extends State<HelperHome> {
 
   StreamController<HelpRequest> _receivingStream;
 
-  final FirebaseNotifications _firebaseClient = FirebaseNotifications();
-
   @override
   void initState() {
     _receivingStream = StreamController<HelpRequest>();
-    _firebaseClient.init();
     super.initState();
   }
 

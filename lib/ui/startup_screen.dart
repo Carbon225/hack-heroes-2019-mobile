@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hack_heroes_mobile/logic/app_mode.dart';
+import 'package:hack_heroes_mobile/logic/firebase_notifications.dart';
 import 'package:hack_heroes_mobile/logic/user_settings.dart';
 import 'package:hack_heroes_mobile/ui/configurator_screen.dart';
 import 'package:hack_heroes_mobile/ui/blind_home.dart';
@@ -40,6 +41,7 @@ class StartupScreen extends StatelessWidget {
 
   Future<void> _setup() async {
     await UserSettings.load();
+    await FirebaseNotifications.init();
   }
 
   @override

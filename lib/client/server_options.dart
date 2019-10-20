@@ -4,5 +4,6 @@ class ServerOptions {
   static const GetHelp = '/getHelp';
   static const OfferHelp = '/offerHelp';
   static const HelpNeeded = '/helpNeeded';
+  static const CancelRequest = '/cancelRequest';
   static const WebSocket = '/ws';
 }

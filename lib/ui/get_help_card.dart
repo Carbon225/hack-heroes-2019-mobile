@@ -57,9 +57,10 @@ class GetHelpCardState extends State<GetHelpCard> {
         print('Getting session');
         _appClient.dispose();
         await _appClient.getHelp(_lastText, image);
-        final response = await _appClient.response;
-        print('Got help $response');
-        widget.onResponse(response);
+        _appClient.onResponse((response) {
+          print('Got help $response');
+          widget.onResponse(response);
+        });
       });
     }
     catch (e) {

@@ -5,18 +5,15 @@ import 'dart:io';
 import 'package:hack_heroes_mobile/client/help_request.dart';
 import 'package:hack_heroes_mobile/client/server_options.dart';
 import 'package:hack_heroes_mobile/client/session.dart';
+import 'package:hack_heroes_mobile/logic/firebase_notifications.dart';
 import 'package:hack_heroes_mobile/logic/help_image.dart';
 import 'package:path_provider/path_provider.dart';
 
 /*
 
-POST /getHelp {text, image}
+POST /getHelp {text, image, firebase_id}
 Server create request with id
-Response {id, place in queue}
-
-WebSocket -> /ws
-send id
-Server assign socket to request with id
+Response {place in queue}
 
 GET /helpNeeded
 Response {needed, id, text, image}
@@ -24,7 +21,7 @@ Client ask user
 
 POST /offerHelp {id, text}
 Server find request with id
-Send text -> request.socket
+Send text with FCM to client with id
 Remove request
 
  */
@@ -33,12 +30,27 @@ Remove request
 class AppClient {
   AppClient();
 
-  void dispose() {
-    _session?.dispose();
+  Future<void> dispose() async {
+    await cancelRequest();
+    await FirebaseNotifications.dispose();
   }
 
-  Future<String> get response {
-    return _session.response;
+  void onResponse(Function cb) {
+    FirebaseNotifications.onResponse(cb);
+  }
+
+  Future<void> cancelRequest() async {
+    final request = await HttpClient().postUrl(
+        Uri.parse('https://${ServerOptions.Host}:${ServerOptions.Port}${ServerOptions.CancelRequest}')
+    );
+
+    request
+      ..headers.contentType = ContentType.json
+      ..write(jsonEncode({
+        'id': await FirebaseNotifications.getToken()
+      }));
+
+    await request.close();
   }
 
   Future<HelpRequest> helpNeeded() async {
@@ -94,16 +106,15 @@ class AppClient {
 
   Future<void> getHelp(String text, HelpImage image) async {
     try {
-      _session = await _requestHelp(text, image);
-      print('Got session ${_session.id}}');
-      await _session.connect();
+      await _requestHelp(text, image);
+      print('Registered request');
     }
     catch (e) {
       print('Error getting help: $e');
     }
   }
 
-  Future<Session> _requestHelp(String text, HelpImage image) async {
+  Future<void> _requestHelp(String text, HelpImage image) async {
     final request = await HttpClient().postUrl(
       Uri.parse('https://${ServerOptions.Host}:${ServerOptions.Port}${ServerOptions.GetHelp}')
     );
@@ -111,6 +122,7 @@ class AppClient {
     request
       ..headers.contentType = ContentType.json
       ..write(jsonEncode({
+        'id': await FirebaseNotifications.getToken(),
         'text': text,
         'image': base64Encode(await image.bytes)
       }));
@@ -123,8 +135,7 @@ class AppClient {
         if (data['status'] == 'ok') {
           final place = data['placeInQueue'] as int;
           print('In queue: $place');
-          final id = data['id'] as String;
-          return Session(id);
+//          return Session(id);
         }
         else {
           throw('Response error ${data['status']}');
@@ -139,6 +150,4 @@ class AppClient {
   Future<Map<String, dynamic>> _decodeResponse(HttpClientResponse response) async {
     return jsonDecode(await utf8.decoder.bind(response).join());
   }
-
-  Session _session;
 }
