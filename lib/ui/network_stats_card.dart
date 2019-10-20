@@ -13,33 +13,41 @@ class NetworkStatsCardState extends State<NetworkStatsCard> {
   @override
   void initState() {
     super.initState();
-    print('STARTING FIREBASE PLSSSS WORK');
     _firebaseMessaging.configure(
-//      onBackgroundMessage: (msg) async => print('BG msg'),
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
+        _showHelpDialog(context, message);
       },
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            content: ListTile(
-              title: Text(message['notification']['title']),
-              subtitle: Text(message['notification']['body']),
-            ),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Ok'),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-        );
+        _showHelpDialog(context, message);
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
+        _showHelpDialog(context, message);
       },
+    );
+  }
+
+  void _showHelpDialog(context, message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: ListTile(
+          title: Text(message['notification']['title']),
+          subtitle: Text(message['notification']['body']),
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Help'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          FlatButton(
+            child: Text('Dismiss'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
     );
   }
 
