@@ -41,7 +41,6 @@ class StartupScreen extends StatelessWidget {
 
   Future<void> _setup() async {
     await UserSettings.load();
-    await FirebaseNotifications.init();
   }
 
   @override

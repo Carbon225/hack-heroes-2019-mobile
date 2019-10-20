@@ -1,4 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:hack_heroes_mobile/logic/app_mode.dart';
+import 'package:hack_heroes_mobile/logic/user_settings.dart';
 
 class FirebaseNotifications {
 
@@ -8,7 +10,9 @@ class FirebaseNotifications {
       onResume: _onNotificationClick,
       onLaunch: _onNotificationClick,
     );
-    await _fcm.subscribeToTopic('helpNeeded');
+    if (UserSettings.mode == AppMode.Helper) {
+      await _fcm.subscribeToTopic('helpNeeded');
+    }
   }
 
   static Future<void> dispose() async {

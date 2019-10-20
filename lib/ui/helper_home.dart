@@ -18,12 +18,14 @@ class HelperHomeState extends State<HelperHome> {
 
   @override
   void initState() {
+    FirebaseNotifications.init();
     _receivingStream = StreamController<HelpRequest>();
     super.initState();
   }
 
   @override
   void dispose() {
+    FirebaseNotifications.dispose();
     _receivingStream.close();
     super.dispose();
   }

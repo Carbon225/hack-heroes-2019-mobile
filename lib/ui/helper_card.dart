@@ -17,19 +17,22 @@ class HelperCard extends StatefulWidget {
 
 class HelperCardState extends State<HelperCard> with SingleTickerProviderStateMixin {
 
-  final _appClient = AppClient();
+  AppClient _appClient;
   Animation<Offset> _fabAnimation;
   AnimationController _fabController;
 
   @override
   void initState() {
-    super.initState();
+    _appClient = AppClient();
 
     _fabController = AnimationController(
       duration: Duration(milliseconds: 200),
       vsync: this,
     );
     _fabAnimation = MaterialPointArcTween(begin: Offset.zero, end: Offset(1.2, 0)).animate(_fabController);
+
+    _checkHelp();
+    super.initState();
   }
 
   @override
