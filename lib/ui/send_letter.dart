@@ -29,7 +29,6 @@ class SendLetterState extends State<SendLetter> with TickerProviderStateMixin {
 
     _sendController = AnimationController(
       duration: SendDuration,
-      reverseDuration: Duration.zero,
       vsync: this,
       value: 0.0,
     );
@@ -78,15 +77,11 @@ class SendLetterState extends State<SendLetter> with TickerProviderStateMixin {
     await Future.delayed(ScaleDuration);
   }
 
-  Future<void> _awaitSend() async {
-    await Future.delayed(SendDuration);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Center(
       child: AnimatedBuilder(
-        animation: _sendController,
+        animation: _sendAnimation,
         builder: (context, child) => Transform(
           transform: Matrix4.translationValues(0.0, -_sendAnimation.value*1000, 0.0),
           child: child,
@@ -95,7 +90,6 @@ class SendLetterState extends State<SendLetter> with TickerProviderStateMixin {
           clipBehavior: Clip.antiAlias,
           child: AnimatedSize(
             duration: ScaleDuration,
-            reverseDuration: Duration.zero,
             curve: Curves.easeInOut,
             vsync: this,
             alignment: Alignment.center,

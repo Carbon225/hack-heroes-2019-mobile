@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hack_heroes_mobile/logic/app_mode.dart';
-import 'package:hack_heroes_mobile/logic/firebase_notifications.dart';
 import 'package:hack_heroes_mobile/logic/user_settings.dart';
 import 'package:hack_heroes_mobile/ui/configurator_screen.dart';
 import 'package:hack_heroes_mobile/ui/blind_home.dart';
@@ -13,10 +12,10 @@ class StartupScreen extends StatelessWidget {
     if (snapshot.connectionState != ConnectionState.done) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Hack Heroes'),
+          title: const Text('Hack Heroes'),
         ),
         body: Center(
-          child: CircularProgressIndicator(),
+          child: const CircularProgressIndicator(),
         ),
       );
     }

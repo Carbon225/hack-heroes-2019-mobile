@@ -3,11 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hack_heroes_mobile/logic/firebase_notifications.dart';
 import 'package:hack_heroes_mobile/logic/user_settings.dart';
-import 'package:hack_heroes_mobile/ui/blind_user_info.dart';
 import 'package:hack_heroes_mobile/ui/braille_keyboard.dart';
 import 'package:hack_heroes_mobile/ui/get_help_card.dart';
 import 'package:hack_heroes_mobile/ui/keyboard_log.dart';
-import 'package:hack_heroes_mobile/ui/network_stats_card.dart';
 import 'package:hack_heroes_mobile/ui/settings_button.dart';
 
 class BlindHome extends StatefulWidget {
@@ -42,7 +40,7 @@ class BlindHomeState extends State<BlindHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('App title'),
+        title: const Text('App title'),
         actions: <Widget>[
           SettingsButton(),
         ],

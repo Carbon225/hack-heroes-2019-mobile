@@ -38,7 +38,7 @@ class HelperHomeState extends State<HelperHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('App title'),
+        title: const Text('App title'),
         actions: <Widget>[
           SettingsButton(),
         ],
@@ -50,7 +50,7 @@ class HelperHomeState extends State<HelperHome> {
           Expanded(
             child: IncomingRequest(_receivingStream.stream),
           ),
-          SizedBox(
+          const SizedBox(
             height: 50,
           ),
         ],

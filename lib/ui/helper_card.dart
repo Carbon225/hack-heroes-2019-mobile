@@ -88,7 +88,7 @@ class HelperCardState extends State<HelperCard> with SingleTickerProviderStateMi
       child: FloatingActionButton.extended(
         onPressed: _checkHelp,
         icon: Transform(
-          transform: Matrix4.translationValues(-10, 0, 0),
+          transform: Matrix4.translationValues(-11, 0, 0),
           child: Image.asset('assets/get_help.png',
             width: 40,
             height: 40,

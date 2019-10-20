@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:hack_heroes_mobile/client/help_request.dart';
 import 'package:hack_heroes_mobile/client/server_options.dart';
-import 'package:hack_heroes_mobile/client/session.dart';
 import 'package:hack_heroes_mobile/logic/firebase_notifications.dart';
 import 'package:hack_heroes_mobile/logic/help_image.dart';
 import 'package:path_provider/path_provider.dart';
@@ -106,6 +105,7 @@ class AppClient {
 
   Future<void> getHelp(String text, HelpImage image) async {
     try {
+      await cancelRequest();
       await _requestHelp(text, image);
       print('Registered request');
     }

@@ -17,7 +17,7 @@ class ConfiguratorScreen extends StatefulWidget {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Icon(Icons.live_help,
+                const Icon(Icons.live_help,
                   color: Colors.blue,
                   size: 100,
                 ),
@@ -142,8 +142,8 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
                 color: Colors.blueAccent,
                 child: Row(
                   children: <Widget>[
-                    Icon(Icons.perm_camera_mic),
-                    Text('Grant permissions'),
+                    const Icon(Icons.perm_camera_mic),
+                    const Text('Grant permissions'),
                   ],
                 ),
               ),
@@ -161,7 +161,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
       children: <Widget>[
         Padding(
           padding: EdgeInsets.only(left: 10, right: 32),
-          child: Icon(Icons.settings,
+          child: const Icon(Icons.settings,
             size: 30,
           ),
         ),
@@ -200,10 +200,10 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
 
   Widget _demoSelect(BuildContext context) {
     return SwitchListTile(
-      title: Text('Demo mode'),
-      subtitle: Text('Select to simulate a Braillepad'),
+      title: const Text('Demo mode'),
+      subtitle: const Text('Select to simulate a Braillepad'),
       value: _demoMode,
-      secondary: Icon(Icons.developer_mode),
+      secondary: const Icon(Icons.developer_mode),
       onChanged: (bool value) => setState(() {
         _demoMode = value;
         _demoMode ? _controller.forward() : _controller.reverse();
@@ -222,7 +222,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
           children: <Widget>[
             Row(
               children: <Widget>[
-                Icon(Icons.bluetooth_searching,
+                const Icon(Icons.bluetooth_searching,
                   color: Colors.blue,
                   size: 50,
                 ),
@@ -234,9 +234,9 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
                 )
               ],
             ),
-            Text('Device 1'),
-            Text('Device 1'),
-            Text('Device 3'),
+            const Text('Device 1'),
+            const Text('Device 1'),
+            const Text('Device 3'),
           ],
         ),
       ),
@@ -255,12 +255,12 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
             Text('Please configure the app',
               style: Theme.of(context).textTheme.title,
             ),
-            Divider(
+            const Divider(
               height: 20,
             ),
             _getPermissions(context),
             _modeSelect(context),
-            Divider(
+            const Divider(
               height: 5,
             ),
             _demoSelect(context),
@@ -315,8 +315,8 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
                   }
               ));
             },
-            label: Text('Continue'),
-            icon: Icon(Icons.done),
+            label: const Text('Continue'),
+            icon: const Icon(Icons.done),
             backgroundColor: _finishColorAnimation.value,
           ),
         );
@@ -328,7 +328,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Welcome'),
+        title: const Text('Welcome'),
       ),
       floatingActionButton: _finish(context),
       body: ListView(
