@@ -25,7 +25,7 @@ class KeyboardLogState extends State<KeyboardLog> with SingleTickerProviderState
           _text = '';
         }
         else {
-          _text = _text.substring(0, _text.length - 2);
+          _text = _text.substring(0, _text.length - 1);
         }
         c = '';
       }

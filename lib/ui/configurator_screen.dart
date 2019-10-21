@@ -17,15 +17,28 @@ class ConfiguratorScreen extends StatefulWidget {
           children: <Widget>[
             Row(
               children: <Widget>[
-                const Icon(Icons.live_help,
-                  color: Colors.blue,
-                  size: 100,
+                DecoratedBox(
+                  decoration: const ShapeDecoration(
+                    color: const Color(0xff4287f5),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: const BorderRadius.all(const Radius.circular(30)),
+                    ),
+                  ),
+                  child: Image.asset('assets/icon/glasses.png',
+                    width: 100,
+                  ),
                 ),
-                Text('Hack Heroes',
-                  style: Theme.of(context).textTheme.title.apply(fontSizeFactor: 2),
-                )
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text('Hack Heroes',
+                      style: Theme.of(context).textTheme.title.apply(fontSizeFactor: 2),
+                    ),
+                  ),
+                ),
               ],
             ),
+            const Divider(),
             Text('Welcome to DA APP. It is great. It works. This is a description. You can you DA APP. Press this and that to do things.',
               textAlign: TextAlign.justify,
               style: Theme.of(context).textTheme.body1,
