@@ -229,40 +229,10 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
     );
   }
 
-  Widget _pairDevice(BuildContext context) {
-    return Card(
-      elevation: 10,
-      margin: EdgeInsets.all(10),
-      child: Padding(
-        padding: EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                const Icon(Icons.bluetooth_searching,
-                  color: Colors.blue,
-                  size: 50,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(right: 10),
-                ),
-                Text('Pair your Braillepad',
-                  style: Theme.of(context).textTheme.title.apply(fontSizeFactor: 1.3),
-                )
-              ],
-            ),
-            BluetoothDeviceList(),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _settings(BuildContext context) {
     return Card(
       elevation: 10,
-      margin: EdgeInsets.all(10),
+      margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
       child: Padding(
         padding: EdgeInsets.all(8),
         child: Column(
@@ -291,7 +261,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
       return true;
     }
     // Blind mode
-    if (_demoMode && await _checkPermissions()) {
+    if ((_demoMode || UserSettings.keyboardID.isNotEmpty) && await _checkPermissions()) {
       return true;
     }
     return false;
@@ -348,26 +318,26 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
       ),
       floatingActionButton: _finish(context),
       body: ListView(
+        shrinkWrap: true,
         children: <Widget>[
           widget._about(context),
           _settings(context),
-          AnimatedSize(
-            duration: Duration(milliseconds: 300),
-            vsync: this,
-            curve: Curves.easeInOut,
-            child: FutureBuilder(
-              initialData: false,
-              future: _checkPermissions(),
-              builder: (context, AsyncSnapshot<bool> snap) => snap.data ? _pairDevice(context) : Container(),
-            ),
+          FutureBuilder(
+            initialData: false,
+            future: Future(() async => await _checkPermissions() && _mode == AppMode.Blind && !_demoMode),
+            builder: (context, AsyncSnapshot<bool> snap) {
+              if (!snap.data) {
+                _controller.forward();
+              }
+              else {
+                _controller.reverse();
+              }
+              return SlideTransition(
+                position: _cardAnimation,
+                child: BluetoothDeviceList(),
+              );
+            },
           ),
-//          SlideTransition(
-//            position: _cardAnimation,
-//            child: _pairDevice(context),
-//          ),
-
-          // write sliding animation
-//          _demoMode ? Container() : _pairDevice(context),
         ],
       ),
     );
