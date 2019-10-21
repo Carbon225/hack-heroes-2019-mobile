@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hack_heroes_mobile/client/client.dart';
+import 'package:hack_heroes_mobile/logic/firebase_notifications.dart';
 
 class HelperCard extends StatefulWidget {
   final bool _fabMode;
@@ -31,12 +32,15 @@ class HelperCardState extends State<HelperCard> with SingleTickerProviderStateMi
     );
     _fabAnimation = MaterialPointArcTween(begin: Offset.zero, end: Offset(1.2, 0)).animate(_fabController);
 
+    FirebaseNotifications.onHelpNeeded(_checkHelp);
+
     _checkHelp();
     super.initState();
   }
 
   @override
   void dispose() {
+    FirebaseNotifications.onHelpNeeded(null);
     _appClient?.dispose();
     super.dispose();
   }
