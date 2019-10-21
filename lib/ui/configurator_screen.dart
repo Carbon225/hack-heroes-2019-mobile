@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hack_heroes_mobile/logic/app_mode.dart';
 import 'package:hack_heroes_mobile/logic/user_settings.dart';
+import 'package:hack_heroes_mobile/ui/ble_device_list.dart';
 import 'package:hack_heroes_mobile/ui/blind_home.dart';
 import 'package:hack_heroes_mobile/ui/helper_home.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -109,8 +110,10 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
   Future<bool> _checkPermissions() async {
 //    return Future.delayed(Duration(seconds: 1), () => false);
     final camera = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
+    final mic = await PermissionHandler().checkPermissionStatus(PermissionGroup.microphone);
+    final ble = await PermissionHandler().checkPermissionStatus(PermissionGroup.location);
 
-    return camera == PermissionStatus.granted;
+    return camera == PermissionStatus.granted && mic == PermissionStatus.granted && ble == PermissionStatus.granted;
   }
 
   Widget _getPermissions(context) {
@@ -144,6 +147,8 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
                 onPressed: () async {
                   await PermissionHandler().requestPermissions([
                     PermissionGroup.camera,
+                    PermissionGroup.microphone,
+                    PermissionGroup.location,
                   ]);
                   if (await _checkPermissions()) {
                     _scaleController.forward();
@@ -247,9 +252,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
                 )
               ],
             ),
-            const Text('Device 1'),
-            const Text('Device 1'),
-            const Text('Device 3'),
+            BluetoothDeviceList(),
           ],
         ),
       ),
@@ -348,10 +351,20 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
         children: <Widget>[
           widget._about(context),
           _settings(context),
-          SlideTransition(
-            position: _cardAnimation,
-            child: _pairDevice(context),
+          AnimatedSize(
+            duration: Duration(milliseconds: 300),
+            vsync: this,
+            curve: Curves.easeInOut,
+            child: FutureBuilder(
+              initialData: false,
+              future: _checkPermissions(),
+              builder: (context, AsyncSnapshot<bool> snap) => snap.data ? _pairDevice(context) : Container(),
+            ),
           ),
+//          SlideTransition(
+//            position: _cardAnimation,
+//            child: _pairDevice(context),
+//          ),
 
           // write sliding animation
 //          _demoMode ? Container() : _pairDevice(context),
