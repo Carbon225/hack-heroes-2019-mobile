@@ -1,4 +1,7 @@
 # [Hack Heroes](hackheroes.pl)
+Connected projects:
+- [Server](https://github.com/Carbon225/hack-heroes-2019-server)
+- [Keyboard](https://github.com/Carbon225/hack-heroes-2019-keyboard)
 ## Overview
 This is my mobile app for the Hack Heroes 2019 competition.
 Its purpose is to help deafblind people perceive the environment by sending images and text written with a Braille keyboard to other users of the app that can answer their questions.
