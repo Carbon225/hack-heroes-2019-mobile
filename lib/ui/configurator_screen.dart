@@ -334,7 +334,18 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
               }
               return SlideTransition(
                 position: _cardAnimation,
-                child: BluetoothDeviceList(),
+                child: FutureBuilder(
+                  initialData: false,
+                  future: _checkPermissions(),
+                  builder: (context, AsyncSnapshot<bool> snap) {
+                    if (snap.data) {
+                      return BluetoothDeviceList();
+                    }
+                    else {
+                      return Container();
+                    }
+                  },
+                ),
               );
             },
           ),

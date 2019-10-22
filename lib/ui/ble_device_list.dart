@@ -13,12 +13,17 @@ class BluetoothDeviceList extends StatefulWidget {
 
 class BluetoothDeviceListState extends State<BluetoothDeviceList> with SingleTickerProviderStateMixin {
   List<BluetoothDevice> _devices = List();
-  BluetoothClient _bleClient;
+  FlutterBlue _bleClient;
   StreamSubscription _scanSub;
 
   @override
   void initState() {
-    _bleClient = BluetoothClient();
+    _bleClient = FlutterBlue.instance;
+    _bleClient.connectedDevices.then((devices) {
+      setState(() {
+        _devices = devices;
+      });
+    });
     Future.delayed(Duration(milliseconds: 1000), () {
       _scan();
     });
@@ -29,20 +34,18 @@ class BluetoothDeviceListState extends State<BluetoothDeviceList> with SingleTic
   @override
   void dispose() {
     _scanSub?.cancel();
-    _bleClient?.dispose();
+    _bleClient?.stopScan();
     super.dispose();
   }
 
-  void _scan() {
-    if (_bleClient.isScanning) {
-      return;
-    }
+  Future<void> _scan() async {
+    await _bleClient.stopScan();
     _scanSub = _bleClient.scan().listen((device) {
-      if (!_devices.contains(device)) {
+      if (!_devices.contains(device.device)) {
         if (!mounted)
           return;
         setState(() {
-          _devices.add(device);
+          _devices.add(device.device);
         });
       }
     });

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:hack_heroes_mobile/bluetooth/ble_keyboard.dart';
 import 'package:hack_heroes_mobile/logic/firebase_notifications.dart';
 import 'package:hack_heroes_mobile/logic/user_settings.dart';
 import 'package:hack_heroes_mobile/ui/braille_keyboard.dart';
@@ -18,12 +19,17 @@ class BlindHomeState extends State<BlindHome> {
   StreamController<String> _keyboardController;
   StreamController<String> _responseController;
 
+  BluetoothKeyboard _bleKeyboard;
+
   @override
   void initState() {
-    FirebaseNotifications.init();
-
     _keyboardController = StreamController<String>();
     _responseController = StreamController<String>.broadcast();
+
+    _bleKeyboard = BluetoothKeyboard();
+    _bleKeyboard.connect(UserSettings.keyboardID);
+
+    FirebaseNotifications.init();
 
     super.initState();
   }
@@ -31,6 +37,7 @@ class BlindHomeState extends State<BlindHome> {
   @override
   void dispose() {
     FirebaseNotifications.dispose();
+    _bleKeyboard.dispose();
     _keyboardController.close();
     _responseController.close();
     super.dispose();

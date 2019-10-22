@@ -17,8 +17,9 @@ class BluetoothClient {
     _blue.stopScan();
   }
 
-  Stream<BluetoothDevice> scan() {
+  Future<Stream<BluetoothDevice>> scan() async {
     print('Scanning BLE');
+    await _blue.stopScan();
     return _blue.scan().map((result) => result.device);
   }
 

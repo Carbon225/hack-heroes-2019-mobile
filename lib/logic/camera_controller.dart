@@ -18,7 +18,7 @@ class CameraWrapper {
   }
 
   Future<void> dispose() async {
-    await _controller.dispose();
+    await _controller?.dispose();
   }
 
   Widget get preview {
