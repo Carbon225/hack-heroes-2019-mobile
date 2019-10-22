@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hack_heroes_mobile/logic/app_mode.dart';
 import 'package:hack_heroes_mobile/logic/user_settings.dart';
+import 'package:hack_heroes_mobile/ui/ble_device_list.dart';
 import 'package:hack_heroes_mobile/ui/blind_home.dart';
 import 'package:hack_heroes_mobile/ui/helper_home.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -109,8 +110,10 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
   Future<bool> _checkPermissions() async {
 //    return Future.delayed(Duration(seconds: 1), () => false);
     final camera = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
+    final mic = await PermissionHandler().checkPermissionStatus(PermissionGroup.microphone);
+    final ble = await PermissionHandler().checkPermissionStatus(PermissionGroup.location);
 
-    return camera == PermissionStatus.granted;
+    return camera == PermissionStatus.granted && mic == PermissionStatus.granted && ble == PermissionStatus.granted;
   }
 
   Widget _getPermissions(context) {
@@ -144,6 +147,8 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
                 onPressed: () async {
                   await PermissionHandler().requestPermissions([
                     PermissionGroup.camera,
+                    PermissionGroup.microphone,
+                    PermissionGroup.location,
                   ]);
                   if (await _checkPermissions()) {
                     _scaleController.forward();
@@ -224,42 +229,10 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
     );
   }
 
-  Widget _pairDevice(BuildContext context) {
-    return Card(
-      elevation: 10,
-      margin: EdgeInsets.all(10),
-      child: Padding(
-        padding: EdgeInsets.all(8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                const Icon(Icons.bluetooth_searching,
-                  color: Colors.blue,
-                  size: 50,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(right: 10),
-                ),
-                Text('Pair your Braillepad',
-                  style: Theme.of(context).textTheme.title.apply(fontSizeFactor: 1.3),
-                )
-              ],
-            ),
-            const Text('Device 1'),
-            const Text('Device 1'),
-            const Text('Device 3'),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _settings(BuildContext context) {
     return Card(
       elevation: 10,
-      margin: EdgeInsets.all(10),
+      margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
       child: Padding(
         padding: EdgeInsets.all(8),
         child: Column(
@@ -288,7 +261,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
       return true;
     }
     // Blind mode
-    if (_demoMode && await _checkPermissions()) {
+    if ((_demoMode || UserSettings.keyboardID.isNotEmpty) && await _checkPermissions()) {
       return true;
     }
     return false;
@@ -345,16 +318,37 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
       ),
       floatingActionButton: _finish(context),
       body: ListView(
+        shrinkWrap: true,
         children: <Widget>[
           widget._about(context),
           _settings(context),
-          SlideTransition(
-            position: _cardAnimation,
-            child: _pairDevice(context),
+          FutureBuilder(
+            initialData: false,
+            future: Future(() async => await _checkPermissions() && _mode == AppMode.Blind && !_demoMode),
+            builder: (context, AsyncSnapshot<bool> snap) {
+              if (!snap.data) {
+                _controller.forward();
+              }
+              else {
+                _controller.reverse();
+              }
+              return SlideTransition(
+                position: _cardAnimation,
+                child: FutureBuilder(
+                  initialData: false,
+                  future: _checkPermissions(),
+                  builder: (context, AsyncSnapshot<bool> snap) {
+                    if (snap.data) {
+                      return BluetoothDeviceList();
+                    }
+                    else {
+                      return Container();
+                    }
+                  },
+                ),
+              );
+            },
           ),
-
-          // write sliding animation
-//          _demoMode ? Container() : _pairDevice(context),
         ],
       ),
     );

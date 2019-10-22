@@ -53,6 +53,15 @@ class UserSettings {
   }
 
 
+  static String get keyboardID {
+    return perfs?.getString("keyboardID") ?? 'not set';
+  }
+
+  static set keyboardID(String id) {
+    perfs.setString('keyboardID', id);
+  }
+
+
   static bool get demoMode {
     return perfs?.getBool("demoMode") ?? false;
   }
