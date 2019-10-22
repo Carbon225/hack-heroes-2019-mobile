@@ -38,7 +38,7 @@ class HelperHomeState extends State<HelperHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('App title'),
+        title: const Text('Helpnet'),
         actions: <Widget>[
           SettingsButton(),
         ],

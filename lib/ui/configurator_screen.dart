@@ -32,7 +32,7 @@ class ConfiguratorScreen extends StatefulWidget {
                 Expanded(
                   child: Align(
                     alignment: Alignment.center,
-                    child: Text('Hack Heroes',
+                    child: Text('Helpnet',
                       style: Theme.of(context).textTheme.title.apply(fontSizeFactor: 2),
                     ),
                   ),
@@ -40,7 +40,7 @@ class ConfiguratorScreen extends StatefulWidget {
               ],
             ),
             const Divider(),
-            Text('Welcome to DA APP. It is great. It works. This is a description. You can you DA APP. Press this and that to do things.',
+            Text('Welcome to Helpnet. Below you can choose to be a volunteer or get help from people all over the world to assist you in your daily life. If you have a Braillepad please grant all required permissions and pair your device. Otherwise, to test the app, please enable Demo Mode.',
               textAlign: TextAlign.justify,
               style: Theme.of(context).textTheme.body1,
             ),

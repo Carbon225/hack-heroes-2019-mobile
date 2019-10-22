@@ -47,7 +47,7 @@ class BlindHomeState extends State<BlindHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('App title'),
+        title: const Text('Helpnet'),
         actions: <Widget>[
           SettingsButton(),
         ],
