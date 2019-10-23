@@ -10,7 +10,8 @@ After sending the photo other users who downloaded the app and selected voluntee
 If they respond the text message is sent back to the deafblind person and played back on their keyboard.
 ## Installation
 ### Use the precompiled binary
-Download and install the latest *.apk* file from the *Releases* page.
+Download and install the latest *.apk* file from the *Releases* page.  
+You do not need to run your own server because the compiled application is configured to use my server.
 ### Compile from source
 1. Install and run the [hack-heroes-2019-server](https://github.com/Carbon225/hack-heroes-2019-server)
 2. Open the Firebase console and follow the instructions for adding a new app
