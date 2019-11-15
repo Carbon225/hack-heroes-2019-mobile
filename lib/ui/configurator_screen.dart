@@ -113,7 +113,7 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
     final mic = await PermissionHandler().checkPermissionStatus(PermissionGroup.microphone);
     final ble = await PermissionHandler().checkPermissionStatus(PermissionGroup.location);
 
-    return camera == PermissionStatus.granted && mic == PermissionStatus.granted && ble == PermissionStatus.granted;
+    return camera == PermissionStatus.granted && mic == PermissionStatus.granted && (ble == PermissionStatus.granted || ble == PermissionStatus.disabled);
   }
 
   Widget _getPermissions(context) {
@@ -186,9 +186,6 @@ class ConfiguratorScreenState extends State<ConfiguratorScreen> with TickerProvi
         Text('Mode',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.subhead,//.apply(fontSizeFactor: 1.2),
-        ),
-        Expanded(
-          child: Container(),
         ),
         Expanded(
           child: Column(
