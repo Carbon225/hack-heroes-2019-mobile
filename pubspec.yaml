@@ -11,7 +11,7 @@ description: App for the Hack Heroes 2019 competition
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -48,7 +48,7 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: false
-  image_path: "assets/icon/glasses.png"
+  image_path: "assets/icon/ic_launcher.png"
   adaptive_icon_foreground: "assets/icon/glasses.png"
   adaptive_icon_background: "#4287f5"
 
